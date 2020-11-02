@@ -1,0 +1,26 @@
+﻿syntax = "proto3";
+
+service ProcessCreationService {
+  rpc CreateServer (CreateServerRequest) returns (CreateServerReply);
+  rpc CreateClient (CreateClientRequest) returns (CreateClientReply);
+}
+
+message CreateServerRequest {
+  string id = 1;
+  string url = 2;
+  int32 min_delay = 3;
+  int32 max_delay = 4;
+}
+message CreateServerReply {
+	bool ok = 1;
+}
+
+message CreateClientRequest {
+  string username = 1;
+  string url = 2;
+  string script_file = 3;
+
+}
+message CreateClientReply {
+	bool ok = 1;
+}
