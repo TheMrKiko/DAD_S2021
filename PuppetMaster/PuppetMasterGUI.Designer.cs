@@ -1,4 +1,4 @@
-﻿namespace GUIChatClient {
+﻿namespace PuppetMaster {
     partial class PuppetMasterGUI {
         /// <summary>
         ///  Required designer variable.
@@ -26,22 +26,22 @@
             this.lbPeerList = new System.Windows.Forms.Label();
             this.lbConv = new System.Windows.Forms.Label();
             this.textBox2 = new System.Windows.Forms.TextBox();
-            this.textBox3 = new System.Windows.Forms.TextBox();
-            this.textBox4 = new System.Windows.Forms.TextBox();
-            this.textBox5 = new System.Windows.Forms.TextBox();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.textBox7 = new System.Windows.Forms.TextBox();
+            this.p_serverids = new System.Windows.Forms.TextBox();
+            this.p_id = new System.Windows.Forms.TextBox();
+            this.r_r = new System.Windows.Forms.TextBox();
+            this.r_send = new System.Windows.Forms.Button();
+            this.p_send = new System.Windows.Forms.Button();
+            this.s_send = new System.Windows.Forms.Button();
+            this.s_url = new System.Windows.Forms.TextBox();
+            this.s_id = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.textBox6 = new System.Windows.Forms.TextBox();
-            this.textBox8 = new System.Windows.Forms.TextBox();
-            this.textBox10 = new System.Windows.Forms.TextBox();
+            this.s_min = new System.Windows.Forms.TextBox();
+            this.s_max = new System.Windows.Forms.TextBox();
+            this.c_file = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.textBox11 = new System.Windows.Forms.TextBox();
-            this.textBox12 = new System.Windows.Forms.TextBox();
-            this.button4 = new System.Windows.Forms.Button();
+            this.c_username = new System.Windows.Forms.TextBox();
+            this.c_url = new System.Windows.Forms.TextBox();
+            this.c_send = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // lbPeerList
@@ -70,73 +70,76 @@
             this.textBox2.Size = new System.Drawing.Size(64, 23);
             this.textBox2.TabIndex = 11;
             // 
-            // textBox3
+            // p_serverids
             // 
-            this.textBox3.Location = new System.Drawing.Point(323, 42);
-            this.textBox3.Multiline = true;
-            this.textBox3.Name = "textBox3";
-            this.textBox3.PlaceholderText = "Server ID\'s";
-            this.textBox3.Size = new System.Drawing.Size(73, 46);
-            this.textBox3.TabIndex = 11;
+            this.p_serverids.Location = new System.Drawing.Point(323, 42);
+            this.p_serverids.Multiline = true;
+            this.p_serverids.Name = "p_serverids";
+            this.p_serverids.PlaceholderText = "Server ID\'s";
+            this.p_serverids.Size = new System.Drawing.Size(73, 46);
+            this.p_serverids.TabIndex = 11;
             // 
-            // textBox4
+            // p_id
             // 
-            this.textBox4.Location = new System.Drawing.Point(246, 42);
-            this.textBox4.Name = "textBox4";
-            this.textBox4.PlaceholderText = "Partition ID";
-            this.textBox4.Size = new System.Drawing.Size(71, 23);
-            this.textBox4.TabIndex = 11;
+            this.p_id.Location = new System.Drawing.Point(246, 42);
+            this.p_id.Name = "p_id";
+            this.p_id.PlaceholderText = "Partition ID";
+            this.p_id.Size = new System.Drawing.Size(71, 23);
+            this.p_id.TabIndex = 11;
             // 
-            // textBox5
+            // r_r
             // 
-            this.textBox5.Location = new System.Drawing.Point(12, 42);
-            this.textBox5.Name = "textBox5";
-            this.textBox5.PlaceholderText = "Nº replicas";
-            this.textBox5.Size = new System.Drawing.Size(90, 23);
-            this.textBox5.TabIndex = 11;
+            this.r_r.Location = new System.Drawing.Point(12, 42);
+            this.r_r.Name = "r_r";
+            this.r_r.PlaceholderText = "Nº replicas";
+            this.r_r.Size = new System.Drawing.Size(90, 23);
+            this.r_r.TabIndex = 11;
             // 
-            // button1
+            // r_send
             // 
-            this.button1.Location = new System.Drawing.Point(108, 42);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(44, 23);
-            this.button1.TabIndex = 12;
-            this.button1.Text = "Send";
-            this.button1.UseVisualStyleBackColor = true;
+            this.r_send.Location = new System.Drawing.Point(108, 42);
+            this.r_send.Name = "r_send";
+            this.r_send.Size = new System.Drawing.Size(44, 23);
+            this.r_send.TabIndex = 12;
+            this.r_send.Text = "Send";
+            this.r_send.UseVisualStyleBackColor = true;
+            this.r_send.Click += new System.EventHandler(this.R_send_Click);
             // 
-            // button2
+            // p_send
             // 
-            this.button2.Location = new System.Drawing.Point(402, 42);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(44, 23);
-            this.button2.TabIndex = 12;
-            this.button2.Text = "Send";
-            this.button2.UseVisualStyleBackColor = true;
+            this.p_send.Location = new System.Drawing.Point(402, 42);
+            this.p_send.Name = "p_send";
+            this.p_send.Size = new System.Drawing.Size(44, 23);
+            this.p_send.TabIndex = 12;
+            this.p_send.Text = "Send";
+            this.p_send.UseVisualStyleBackColor = true;
+            this.p_send.Click += new System.EventHandler(this.P_send_Click);
             // 
-            // button3
+            // s_send
             // 
-            this.button3.Location = new System.Drawing.Point(352, 105);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(44, 23);
-            this.button3.TabIndex = 12;
-            this.button3.Text = "Send";
-            this.button3.UseVisualStyleBackColor = true;
+            this.s_send.Location = new System.Drawing.Point(352, 105);
+            this.s_send.Name = "s_send";
+            this.s_send.Size = new System.Drawing.Size(44, 23);
+            this.s_send.TabIndex = 12;
+            this.s_send.Text = "Send";
+            this.s_send.UseVisualStyleBackColor = true;
+            this.s_send.Click += new System.EventHandler(this.Se_send_Click);
             // 
-            // textBox1
+            // s_url
             // 
-            this.textBox1.Location = new System.Drawing.Point(82, 105);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.PlaceholderText = "URL";
-            this.textBox1.Size = new System.Drawing.Size(158, 23);
-            this.textBox1.TabIndex = 11;
+            this.s_url.Location = new System.Drawing.Point(82, 105);
+            this.s_url.Name = "s_url";
+            this.s_url.PlaceholderText = "URL";
+            this.s_url.Size = new System.Drawing.Size(158, 23);
+            this.s_url.TabIndex = 11;
             // 
-            // textBox7
+            // s_id
             // 
-            this.textBox7.Location = new System.Drawing.Point(12, 105);
-            this.textBox7.Name = "textBox7";
-            this.textBox7.PlaceholderText = "Server ID";
-            this.textBox7.Size = new System.Drawing.Size(64, 23);
-            this.textBox7.TabIndex = 11;
+            this.s_id.Location = new System.Drawing.Point(12, 105);
+            this.s_id.Name = "s_id";
+            this.s_id.PlaceholderText = "Server ID";
+            this.s_id.Size = new System.Drawing.Size(64, 23);
+            this.s_id.TabIndex = 11;
             // 
             // label1
             // 
@@ -147,31 +150,31 @@
             this.label1.TabIndex = 7;
             this.label1.Text = "3. Server";
             // 
-            // textBox6
+            // s_min
             // 
-            this.textBox6.Location = new System.Drawing.Point(246, 105);
-            this.textBox6.Name = "textBox6";
-            this.textBox6.PlaceholderText = "Min delay (ms)";
-            this.textBox6.Size = new System.Drawing.Size(47, 23);
-            this.textBox6.TabIndex = 11;
-            this.textBox6.Text = "0";
+            this.s_min.Location = new System.Drawing.Point(246, 105);
+            this.s_min.Name = "s_min";
+            this.s_min.PlaceholderText = "Min delay (ms)";
+            this.s_min.Size = new System.Drawing.Size(47, 23);
+            this.s_min.TabIndex = 11;
+            this.s_min.Text = "0";
             // 
-            // textBox8
+            // s_max
             // 
-            this.textBox8.Location = new System.Drawing.Point(299, 105);
-            this.textBox8.Name = "textBox8";
-            this.textBox8.PlaceholderText = "Maz delay (ms)";
-            this.textBox8.Size = new System.Drawing.Size(47, 23);
-            this.textBox8.TabIndex = 11;
-            this.textBox8.Text = "0";
+            this.s_max.Location = new System.Drawing.Point(299, 105);
+            this.s_max.Name = "s_max";
+            this.s_max.PlaceholderText = "Maz delay (ms)";
+            this.s_max.Size = new System.Drawing.Size(47, 23);
+            this.s_max.TabIndex = 11;
+            this.s_max.Text = "0";
             // 
-            // textBox10
+            // c_file
             // 
-            this.textBox10.Location = new System.Drawing.Point(246, 163);
-            this.textBox10.Name = "textBox10";
-            this.textBox10.PlaceholderText = "Script file (local)";
-            this.textBox10.Size = new System.Drawing.Size(100, 23);
-            this.textBox10.TabIndex = 11;
+            this.c_file.Location = new System.Drawing.Point(246, 163);
+            this.c_file.Name = "c_file";
+            this.c_file.PlaceholderText = "Script file (local)";
+            this.c_file.Size = new System.Drawing.Size(100, 23);
+            this.c_file.TabIndex = 11;
             // 
             // label2
             // 
@@ -182,52 +185,53 @@
             this.label2.TabIndex = 7;
             this.label2.Text = "Client";
             // 
-            // textBox11
+            // c_username
             // 
-            this.textBox11.Location = new System.Drawing.Point(12, 163);
-            this.textBox11.Name = "textBox11";
-            this.textBox11.PlaceholderText = "Username";
-            this.textBox11.Size = new System.Drawing.Size(64, 23);
-            this.textBox11.TabIndex = 11;
+            this.c_username.Location = new System.Drawing.Point(12, 163);
+            this.c_username.Name = "c_username";
+            this.c_username.PlaceholderText = "Username";
+            this.c_username.Size = new System.Drawing.Size(64, 23);
+            this.c_username.TabIndex = 11;
             // 
-            // textBox12
+            // c_url
             // 
-            this.textBox12.Location = new System.Drawing.Point(82, 163);
-            this.textBox12.Name = "textBox12";
-            this.textBox12.PlaceholderText = "URL";
-            this.textBox12.Size = new System.Drawing.Size(158, 23);
-            this.textBox12.TabIndex = 11;
+            this.c_url.Location = new System.Drawing.Point(82, 163);
+            this.c_url.Name = "c_url";
+            this.c_url.PlaceholderText = "URL";
+            this.c_url.Size = new System.Drawing.Size(158, 23);
+            this.c_url.TabIndex = 11;
             // 
-            // button4
+            // c_send
             // 
-            this.button4.Location = new System.Drawing.Point(352, 163);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(44, 23);
-            this.button4.TabIndex = 12;
-            this.button4.Text = "Send";
-            this.button4.UseVisualStyleBackColor = true;
+            this.c_send.Location = new System.Drawing.Point(352, 163);
+            this.c_send.Name = "c_send";
+            this.c_send.Size = new System.Drawing.Size(44, 23);
+            this.c_send.TabIndex = 12;
+            this.c_send.Text = "Send";
+            this.c_send.UseVisualStyleBackColor = true;
+            this.c_send.Click += new System.EventHandler(this.C_send_Click);
             // 
             // PuppetMasterGUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(458, 322);
-            this.Controls.Add(this.button4);
-            this.Controls.Add(this.textBox12);
-            this.Controls.Add(this.textBox11);
+            this.Controls.Add(this.c_send);
+            this.Controls.Add(this.c_url);
+            this.Controls.Add(this.c_username);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.textBox10);
-            this.Controls.Add(this.textBox8);
-            this.Controls.Add(this.textBox6);
+            this.Controls.Add(this.c_file);
+            this.Controls.Add(this.s_max);
+            this.Controls.Add(this.s_min);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.textBox7);
-            this.Controls.Add(this.textBox1);
-            this.Controls.Add(this.button3);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
-            this.Controls.Add(this.textBox5);
-            this.Controls.Add(this.textBox4);
-            this.Controls.Add(this.textBox3);
+            this.Controls.Add(this.s_id);
+            this.Controls.Add(this.s_url);
+            this.Controls.Add(this.s_send);
+            this.Controls.Add(this.p_send);
+            this.Controls.Add(this.r_send);
+            this.Controls.Add(this.r_r);
+            this.Controls.Add(this.p_id);
+            this.Controls.Add(this.p_serverids);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.lbConv);
             this.Controls.Add(this.lbPeerList);
@@ -244,22 +248,22 @@
         private System.Windows.Forms.Label lbPeerList;
         private System.Windows.Forms.Label lbConv;
         private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.TextBox textBox4;
-        private System.Windows.Forms.TextBox textBox5;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.TextBox textBox7;
+        private System.Windows.Forms.TextBox p_serverids;
+        private System.Windows.Forms.TextBox p_id;
+        private System.Windows.Forms.TextBox r_r;
+        private System.Windows.Forms.Button r_send;
+        private System.Windows.Forms.Button p_send;
+        private System.Windows.Forms.Button s_send;
+        private System.Windows.Forms.TextBox s_url;
+        private System.Windows.Forms.TextBox s_id;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox textBox6;
-        private System.Windows.Forms.TextBox textBox8;
-        private System.Windows.Forms.TextBox textBox10;
+        private System.Windows.Forms.TextBox s_min;
+        private System.Windows.Forms.TextBox s_max;
+        private System.Windows.Forms.TextBox c_file;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox textBox11;
-        private System.Windows.Forms.TextBox textBox12;
-        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.TextBox c_username;
+        private System.Windows.Forms.TextBox c_url;
+        private System.Windows.Forms.Button c_send;
     }
 }
 
