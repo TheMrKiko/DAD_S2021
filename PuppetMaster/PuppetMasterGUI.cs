@@ -8,16 +8,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace GUIChatClient {
+namespace PuppetMaster {
     public partial class PuppetMasterGUI : Form {
-        GUIChatClient clientLogic;
+        PuppetMasterLogic puppetLogic;
         public PuppetMasterGUI() {
             InitializeComponent();
-            clientLogic = new GUIChatClient(this, false, "localhost", 1001, "localhost");
+            
+            puppetLogic = new PuppetMasterLogic(this, "localhost", 10001);
         }
 
         private void btReg_Click(object sender, EventArgs e) {
-            /*foreach (string nick in clientLogic.Register(tbNick.Text, tbPort.Text)) {
+            /*foreach (string nick in puppetLogic.Register(tbNick.Text, tbPort.Text)) {
                 tbRegResult.Text += nick + "\r\n";
             }
             tbNick.Enabled = false;
@@ -29,14 +30,35 @@ namespace GUIChatClient {
         }
 
         private void form1_Closing(object sender, FormClosingEventArgs e) {
-            clientLogic.ServerShutdown();
+            puppetLogic.ServerShutdown();
         }
 
         private async void btSend_Click(object sender, EventArgs e) {
             /*string m = tbMsg.Text;
-            await clientLogic.BcastMsg(m);
+            await puppetLogic.BcastMsg(m);
             tbConv.Text += "me: " + tbMsg.Text + "\r\n";
             tbMsg.Text = "";*/
+        }
+
+        private void R_send_Click(object sender, EventArgs e)
+        {
+            int r = int.Parse(r_r.Text);
+            puppetLogic.ReplicationFactor(r);
+        }
+
+        private void P_send_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Se_send_Click(object sender, EventArgs e)
+        {
+            puppetLogic.Server("h", s_url.Text, 1, 1);
+        }
+
+        private void C_send_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
