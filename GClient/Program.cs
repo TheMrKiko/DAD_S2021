@@ -10,11 +10,16 @@ namespace GUIChatClient {
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main() {
+        static void Main(string[] args) {
+
+            string username = args[0];
+            string url = args[1];
+            string file = args[2];
+
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new Form1(username, url, file));
         }
     }
 }

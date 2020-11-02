@@ -11,7 +11,7 @@ using System.Windows.Forms;
 namespace GUIChatClient {
     public partial class Form1 : Form {
         GUIChatClient clientLogic;
-        public Form1() {
+        public Form1(string username, string url, string file) {
             InitializeComponent();
             clientLogic = new GUIChatClient(this, false, "localhost", 1001, "localhost");
         }
