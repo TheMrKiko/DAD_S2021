@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GClient": {
+      "commandName": "Project",
+      "commandLineArgs": "no-sec"
+    }
+  }
+}
