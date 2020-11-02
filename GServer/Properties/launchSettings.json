@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GServer": {
+      "commandName": "Project",
+      "commandLineArgs": "no-sec"
+    }
+  }
+}

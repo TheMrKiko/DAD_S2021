@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "ChatServer": {
+    "GClient": {
       "commandName": "Project",
       "commandLineArgs": "no-sec"
     }
