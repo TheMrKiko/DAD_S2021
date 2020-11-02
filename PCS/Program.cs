@@ -14,7 +14,7 @@ namespace PCS
 
         public static void Main(string[] args)
         {
-            const int port = 1001;
+            const int port = 10000;
             const string hostname = "localhost";
             string startupMessage;
             ServerPort serverPort;

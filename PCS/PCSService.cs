@@ -40,6 +40,7 @@ private Dictionary<string, ChatClientService.ChatClientServiceClient> clientMap 
             Process p = new Process();
             bool r;
             p.StartInfo.FileName = "../../../../GClient/bin/debug/netcoreapp3.1/GClient";
+            p.StartInfo.Arguments = $"{request.Username} {request.Url} {request.ScriptFile}";
             r = p.Start();
 
             return new CreateClientReply { Ok = r };
@@ -49,7 +50,9 @@ private Dictionary<string, ChatClientService.ChatClientServiceClient> clientMap 
         {
             Process p = new Process();
             bool r;
-            p.StartInfo.FileName = "../../../../GServer/bin/debug/netcoreapp3.1/GServer";
+            const string filename = "../../../../GServer/bin/debug/netcoreapp3.1/GServer";
+            p.StartInfo.FileName = filename;
+            p.StartInfo.Arguments = $"{request.Id} {request.Url} {request.MinDelay} {request.MaxDelay}";
             r = p.Start();
 
             return new CreateServerReply { Ok = r };

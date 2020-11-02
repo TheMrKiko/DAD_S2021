@@ -2,7 +2,8 @@
   "profiles": {
     "GServer": {
       "commandName": "Project",
-      "commandLineArgs": "no-sec"
+      "commandLineArgs": "no-sec",
+      "remoteDebugEnabled": false
     }
   }
 }
