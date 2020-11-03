@@ -1,0 +1,23 @@
+﻿syntax = "proto3";
+
+service PuppetNodeService {
+  rpc RegisterServer (RegisterServerRequest) returns (RegisterServerReply);
+  rpc RegisterPartition (RegisterPartitionRequest) returns (RegisterPartitionReply);
+  rpc Status (StatusRequest) returns (StatusReply);
+}
+message RegisterServerRequest {
+  int32 id = 1;
+  string url = 2;	
+}
+message RegisterServerReply {
+}
+message RegisterPartitionRequest {
+  int32 partition_id = 1;
+  repeated string server_ids = 2;
+}
+message RegisterPartitionReply {
+}
+message StatusRequest {
+}
+message StatusReply {
+}
