@@ -4,11 +4,13 @@ using System.IO;
 using System.Security;
 using System.Threading;
 
-namespace chatServer
+namespace GS
 {
-    class Program {
-        
-        public static void Main(string[] args) {
+    class Program
+    {
+
+        public static void Main(string[] args)
+        {
             const string hostname = "localhost";
 
             string id = args[0];
@@ -26,16 +28,15 @@ namespace chatServer
 
             Server server = new Server
             {
-                Services = { ChatServerService.BindService(new ServerService()) },
-            Ports = { serverPort }
-        };
+                Services = { GServerService.BindService(new ServerService()) },
+                Ports = { serverPort }
+            };
 
             server.Start();
 
             Console.WriteLine(startupMessage);
             //Configuring HTTP for client connections in Register method
-            AppContext.SetSwitch(
-  "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             while (true) ;
         }
     }
