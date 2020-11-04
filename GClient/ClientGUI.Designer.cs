@@ -1,5 +1,5 @@
-﻿namespace GUIChatClient {
-    partial class Form1 {
+﻿namespace GC {
+    partial class ClientGUI {
         /// <summary>
         ///  Required designer variable.
         /// </summary>
@@ -129,7 +129,7 @@
             this.lbConv.TabIndex = 10;
             this.lbConv.Text = "Conversation";
             // 
-            // Form1
+            // ClientGUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -145,8 +145,8 @@
             this.Controls.Add(this.tbPort);
             this.Controls.Add(this.tbNick);
             this.Controls.Add(this.btReg);
-            this.Name = "Form1";
-            this.Text = "Form1";
+            this.Name = "ClientGUI";
+            this.Text = "ClientGUI";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.form1_Closing);
             this.ResumeLayout(false);
             this.PerformLayout();

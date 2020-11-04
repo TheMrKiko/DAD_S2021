@@ -10,20 +10,21 @@ using System.Threading.Tasks;
 
 public delegate void DelAddMsg(string s);
 
-namespace GUIChatClient {
+namespace GC
+{
     public interface IChatClientService {
         bool AddMsgtoGUI(string s);
     }
-    public class GUIChatClient : IChatClientService {
+    public class ClientLogic : IChatClientService {
         private readonly GrpcChannel channel;
         private readonly ChatServerService.ChatServerServiceClient client;
         private Server server;
-        private readonly Form1 guiWindow;
+        private readonly ClientGUI guiWindow;
         private string nick;
         private string hostname;
         private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
 
-        public GUIChatClient(Form1 guiWindow, bool sec, string serverHostname, int serverPort, 
+        public ClientLogic(ClientGUI guiWindow, bool sec, string serverHostname, int serverPort, 
                              string clientHostname) {
             this.hostname = clientHostname;
             this.guiWindow = guiWindow;
@@ -76,35 +77,6 @@ namespace GUIChatClient {
 
         public void ServerShutdown() {
             server.ShutdownAsync().Wait();
-        }
-    }
-
-
-    public class ClientService : ChatClientService.ChatClientServiceBase {
-        IChatClientService clientLogic;
-
-        public ClientService(IChatClientService clientLogic) {
-            this.clientLogic = clientLogic;
-        }
-
-        public override Task<RecvMsgReply> RecvMsg(
-            RecvMsgRequest request, ServerCallContext context) {
-            return Task.FromResult(UpdateGUIwithMsg(request));
-        }
-
-        public RecvMsgReply UpdateGUIwithMsg(RecvMsgRequest request) {
-           if ( clientLogic.AddMsgtoGUI(request.Msg)) { 
-            return new RecvMsgReply
-            {
-                Ok = true
-            };
-            } else {
-                return new RecvMsgReply
-                {
-                    Ok = false
-                };
-
-            }
         }
     }
 }

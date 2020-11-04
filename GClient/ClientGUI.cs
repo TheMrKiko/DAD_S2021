@@ -8,12 +8,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace GUIChatClient {
-    public partial class Form1 : Form {
-        GUIChatClient clientLogic;
-        public Form1(string username, string url, string file) {
+namespace GC {
+    public partial class ClientGUI : Form {
+        ClientLogic clientLogic;
+        public ClientGUI(string username, string url, string file) {
             InitializeComponent();
-            clientLogic = new GUIChatClient(this, false, "localhost", 1001, "localhost");
+            clientLogic = new ClientLogic(this, false, "localhost", 1001, "localhost");
         }
 
         private void btReg_Click(object sender, EventArgs e) {
