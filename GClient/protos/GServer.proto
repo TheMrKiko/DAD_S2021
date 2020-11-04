@@ -1,24 +1,33 @@
 ﻿syntax = "proto3";
 
-service ChatServerService {
-  rpc Register (ChatClientRegisterRequest) returns (ChatClientRegisterReply);
-  rpc BcastMsg (BcastMsgRequest) returns (BcastMsgReply);
+service GServerService {
+  rpc ReadServer (ReadServerRequest) returns (ReadServerReply);
+  rpc WriteServer (WriteServerRequest) returns (WriteServerReply);
+  //rpc ListServer (ListServerRequest) returns (ListServerReply);
 }
-message ChatClientRegisterRequest {
-  string nick = 1;
-  string url = 2;	
+message ReadServerRequest {
+  string partition_id = 1;
+  string object_id = 2;	
 }
-message ChatClientRegisterReply {
-	repeated User users = 1;
-}
-message User {
-   string nick = 1;
+message ReadServerReply {
+  Object object = 1;
 }
 
-message BcastMsgRequest {
-  string nick = 1;
-  string msg = 2;	
+message WriteServerRequest {
+  string partition_id = 1;
+  string object_id = 2;
+  Object new_object = 3;
 }
-message BcastMsgReply {
-	bool ok = 1;
+message WriteServerReply {
+  bool ok = 1;
+}
+
+message ListServerRequest {
+}
+
+message ListServerReply {
+  repeated Object users = 1;
+}
+message Object {
+   string value = 1;
 }
