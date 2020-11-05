@@ -2,72 +2,55 @@
 using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
-namespace GS
+namespace GC
 {
-    // GSService is the namespace defined in the protobuf
-    // GSServiceBase is the generated base implementation of the service
-    public class GServerService : GSService.GSServiceBase
+    // ChatServerService is the namespace defined in the protobuf
+    // ChatServerServiceBase is the generated base implementation of the service
+    public class PuppetNodeService : PNodeService.PNodeServiceBase
     {
         private GrpcChannel channel;
+
         //private Dictionary<string, ChatClientService.ChatClientServiceClient> clientMap =
-          //  new Dictionary<string, ChatClientService.ChatClientServiceClient>();
+        //  new Dictionary<string, ChatClientService.ChatClientServiceClient>();
+        private readonly ClientLogic clientLogic;
 
-        private Dictionary<string, string> data = new Dictionary<string, string>();
-        private readonly Dictionary<string, string> serverList = new Dictionary<string, string>();
-        private readonly Dictionary<string, List<string>> partitionList = new Dictionary<string, List<string>>();
-
-        public GServerService()
+        public PuppetNodeService(ClientLogic clientLogic)
         {
+            this.clientLogic = clientLogic;
         }
 
-
-        public override Task<ReadServerReply> ReadServer(ReadServerRequest request, ServerCallContext context)
+        public override Task<RegisterPartitionReply> RegisterPartition(RegisterPartitionRequest request, ServerCallContext context)
         {
             Console.WriteLine("Deadline: " + context.Deadline);
             Console.WriteLine("Host: " + context.Host);
             Console.WriteLine("Method: " + context.Method);
             Console.WriteLine("Peer: " + context.Peer);
-            return Task.FromResult(Read(request));
+
+            this.clientLogic.StorePartition(request.PartitionId, new List<string>(request.ServerIds.ToList()));
+            return Task.FromResult(new RegisterPartitionReply());
         }
 
-        public override Task<WriteServerReply> WriteServer(WriteServerRequest request, ServerCallContext context)
+        public override Task<RegisterServerReply> RegisterServer(RegisterServerRequest request, ServerCallContext context)
         {
             Console.WriteLine("Deadline: " + context.Deadline);
             Console.WriteLine("Host: " + context.Host);
             Console.WriteLine("Method: " + context.Method);
             Console.WriteLine("Peer: " + context.Peer);
-            return Task.FromResult(Write(request));
+
+            this.clientLogic.StoreServer(request.Id, request.Url);
+
+            return Task.FromResult(new RegisterServerReply());
         }
 
-        private ReadServerReply Read(ReadServerRequest request)
+        public override Task<StatusReply> Status(StatusRequest request, ServerCallContext context)
         {
-            string id = request.ObjectId;
-            if (!data.TryGetValue(id, out string value))
-                value = "N/A";
-            return new ReadServerReply { Object = new Object { Value = value } };
+            return base.Status(request, context);
         }
 
-        private WriteServerReply Write(WriteServerRequest request)
-        {
-            lock(this) {
-                data[request.ObjectId] = request.NewObject.Value;
-            }
-            return new WriteServerReply { Ok = true };
-        }
-
-        public void StoreServer(string id, string url)
-        {
-            lock (this)
-                this.serverList.Add(id, url);
-        }
-
-        public void StorePartition(string partitionId, List<string> serverIds)
-        {
-            lock (this)
-                this.partitionList.Add(partitionId, serverIds);
-        }
+        
 
 
 

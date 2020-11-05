@@ -25,10 +25,11 @@ namespace GS
 
             serverPort = new ServerPort(hostname, port, ServerCredentials.Insecure);
             startupMessage = "Insecure ChatServer server listening on port " + port;
+            GServerService service = new GServerService();
 
             Server server = new Server
             {
-                Services = { GSService.BindService(new GServerService()) },
+                Services = { GSService.BindService(service),PNodeService.BindService(new PuppetNodeService(service)) },
                 Ports = { serverPort }
             };
 

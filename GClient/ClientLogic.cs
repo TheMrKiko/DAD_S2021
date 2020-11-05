@@ -1,4 +1,5 @@
-﻿using Grpc.Core;
+﻿using Google.Protobuf.Collections;
+using Grpc.Core;
 using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace GC
 {
     public interface IClientGUI
     {
-        bool AddMsgtoGUI(string s);
+        //bool AddMsgtoGUI(string s);
     }
     public class ClientLogic : IClientGUI
     {
@@ -23,9 +24,11 @@ namespace GC
         private readonly string hostname;
         private readonly int port;
         private readonly Server server;
+        private readonly Dictionary<string, string> serverList = new Dictionary<string, string>();
+        private readonly Dictionary<string, List<string>> partitionList = new Dictionary<string, List<string>>();
         private GrpcChannel channel;
-        private GServerService.GServerServiceClient client;
-        private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
+        private GSService.GSServiceClient client;
+        //private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
 
         public ClientLogic(ClientGUI guiWindow, string username, string url, string file)
         {
@@ -39,7 +42,7 @@ namespace GC
             // setup the client service
             server = new Server
             {
-                Services = { GCService.BindService(new GClientService(this)) },
+                Services = { GCService.BindService(new GClientService(this)), PNodeService.BindService(new PuppetNodeService(this)) },
                 Ports = { new ServerPort(hostname, port, ServerCredentials.Insecure) }
             };
 
@@ -47,14 +50,25 @@ namespace GC
 
         }
 
-        public void ConnectToServer()
+        public void ConnectToServer(string id)
         {
             // setup the client side
-
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            channel = GrpcChannel.ForAddress($"http://{uri.Host}:10000");
+            channel = GrpcChannel.ForAddress(serverList[id]);
 
-            client = new GServerService.GServerServiceClient(channel);
+            client = new GSService.GSServiceClient(channel);
+        }
+
+        public void StoreServer(string id, string url)
+        {
+            lock (this)
+                this.serverList.Add(id, url);
+        }
+
+        public void StorePartition(string partitionId, List<string> serverIds)
+        {
+            lock (this)
+                this.partitionList.Add(partitionId, serverIds);
         }
 
         /*public bool AddMsgtoGUI(string s) {

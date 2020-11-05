@@ -17,9 +17,9 @@ namespace GC {
         }
 
         private void btReg_Click(object sender, EventArgs e) {
-            foreach (string nick in clientLogic.Register(tbNick.Text, tbPort.Text)) {
+            /*foreach (string nick in clientLogic.Register(tbNick.Text, tbPort.Text)) {
                 tbRegResult.Text += nick + "\r\n";
-            }
+            }*/
             tbNick.Enabled = false;
             tbPort.Enabled = false;
         }
@@ -32,7 +32,7 @@ namespace GC {
 
         private async void btSend_Click(object sender, EventArgs e) {
             string m = tbMsg.Text;
-            await clientLogic.BcastMsg(m);
+            //await clientLogic.BcastMsg(m);
             tbConv.Text += "me: " + tbMsg.Text + "\r\n";
             tbMsg.Text = "";
         }

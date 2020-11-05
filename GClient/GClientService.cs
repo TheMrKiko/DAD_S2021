@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 namespace GC
 {
     public class GClientService : GCService.GCServiceBase {
-        IClientGUI clientLogic;
+        private readonly IClientGUI clientLogic;
 
         public GClientService(IClientGUI clientLogic) {
             this.clientLogic = clientLogic;
         }
 
-        public Task<RecvMsgReply> RecvMsg(
+        /*public Task<RecvMsgReply> RecvMsg(
             RecvMsgRequest request, ServerCallContext context) {
             return Task.FromResult(UpdateGUIwithMsg(request));
         }
@@ -28,6 +28,6 @@ namespace GC
                 };
 
             }
-        }
+        }*/
     }
 }

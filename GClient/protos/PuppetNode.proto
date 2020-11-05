@@ -6,13 +6,13 @@ service PNodeService {
   rpc Status (StatusRequest) returns (StatusReply);
 }
 message RegisterServerRequest {
-  int32 id = 1;
+  string id = 1;
   string url = 2;	
 }
 message RegisterServerReply {
 }
 message RegisterPartitionRequest {
-  int32 partition_id = 1;
+  string partition_id = 1;
   repeated string server_ids = 2;
 }
 message RegisterPartitionReply {
