@@ -26,6 +26,10 @@ namespace GS
 
         public void GetInfoFromMaster()
         {
+            Console.WriteLine();
+            Console.WriteLine("--- Server ---");
+            Console.WriteLine("Asking master for some info on the network");
+
             string local = "localhost";
             channel = GrpcChannel.ForAddress($"http://{local}:10001");
             pmc = new PMasterService.PMasterServiceClient(channel);
@@ -41,25 +45,24 @@ namespace GS
             {
                 StoreServer(serverInf.Id, serverInf.Url);
             }
+            Console.WriteLine("Got that info, ready to work!");
         }
 
         public override Task<ReadServerReply> ReadServer(ReadServerRequest request, ServerCallContext context)
         {
-            Console.WriteLine("--- SERVER ---");
-            Console.WriteLine("Deadline: " + context.Deadline);
-            Console.WriteLine("Host: " + context.Host);
-            Console.WriteLine("Method: " + context.Method);
-            Console.WriteLine("Peer: " + context.Peer);
+            Console.WriteLine();
+            Console.WriteLine("--- Server ---");
+            Console.WriteLine("A client is " + context.Method);
+            Console.WriteLine("-- As in: " + request);
             return Task.FromResult(Read(request));
         }
 
         public override Task<WriteServerReply> WriteServer(WriteServerRequest request, ServerCallContext context)
         {
-            Console.WriteLine("--- SERVER ---");
-            Console.WriteLine("Deadline: " + context.Deadline);
-            Console.WriteLine("Host: " + context.Host);
-            Console.WriteLine("Method: " + context.Method);
-            Console.WriteLine("Peer: " + context.Peer);
+            Console.WriteLine();
+            Console.WriteLine("--- Server ---");
+            Console.WriteLine("A client is " + context.Method);
+            Console.WriteLine("-- As in: " + request);
             return Task.FromResult(Write(request));
         }
 
@@ -68,6 +71,7 @@ namespace GS
             string id = request.ObjectId;
             if (!data.TryGetValue(id, out string value))
                 value = "N/A";
+            Console.WriteLine("I only got " + value);
             return new ReadServerReply { Object = new Object { Value = value } };
         }
 
@@ -76,6 +80,7 @@ namespace GS
             lock(this) {
                 data[request.ObjectId] = request.NewObject.Value;
             }
+            Console.WriteLine("Done.");
             return new WriteServerReply { Ok = true };
         }
 

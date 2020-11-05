@@ -52,7 +52,7 @@ namespace GC
             };
 
             server.Start();
-
+            Console.WriteLine("Insecure ChatServer server listening on port " + port);
             GetInfoFromMaster();
         }
 
@@ -97,6 +97,10 @@ namespace GC
 
         public void GetInfoFromMaster()
         {
+            Console.WriteLine();
+            Console.WriteLine("--- Client ---");
+            Console.WriteLine("Asking master for some info on the network");
+
             string local = "localhost";
             channel = GrpcChannel.ForAddress($"http://{local}:10001");
             pmc = new PMasterService.PMasterServiceClient(channel);
@@ -113,6 +117,8 @@ namespace GC
                 StoreServer(serverInf.Id, serverInf.Url);
             }
             channel = null;
+
+            Console.WriteLine("Got that info, ready to work!");
         }
 
 
@@ -150,6 +156,10 @@ namespace GC
 
         public void ConnectToServer(string id)
         {
+            Console.WriteLine();
+            Console.WriteLine("--- Client ---");
+            Console.WriteLine("Will switch to server " + id);
+
             // setup the client side
             if (channel != null)
                 channel.Dispose();

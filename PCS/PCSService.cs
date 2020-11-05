@@ -19,21 +19,17 @@ private Dictionary<string, ChatClientService.ChatClientServiceClient> clientMap 
 
         public override Task<CreateClientReply> CreateClient(CreateClientRequest request, ServerCallContext context)
         {
+            Console.WriteLine();
             Console.WriteLine("--- PCS ---");
-            Console.WriteLine("Deadline: " + context.Deadline);
-            Console.WriteLine("Host: " + context.Host);
-            Console.WriteLine("Method: " + context.Method);
-            Console.WriteLine("Peer: " + context.Peer);
+            Console.WriteLine("Master ordered to " + context.Method);
             return Task.FromResult(NewClient(request));
         }
 
         public override Task<CreateServerReply> CreateServer(CreateServerRequest request, ServerCallContext context)
         {
+            Console.WriteLine();
             Console.WriteLine("--- PCS ---");
-            Console.WriteLine("Deadline: " + context.Deadline);
-            Console.WriteLine("Host: " + context.Host);
-            Console.WriteLine("Method: " + context.Method);
-            Console.WriteLine("Peer: " + context.Peer);
+            Console.WriteLine("Master ordered to " + context.Method);
             return Task.FromResult(NewServer(request));
         }
 
@@ -46,6 +42,7 @@ private Dictionary<string, ChatClientService.ChatClientServiceClient> clientMap 
             p.StartInfo.Arguments = $" /c start {filename} {request.Username} {request.Url} {request.ScriptFile}";
             r = p.Start();
 
+            Console.WriteLine("Process started.");
             return new CreateClientReply { Ok = r };
         }
 
@@ -58,6 +55,7 @@ private Dictionary<string, ChatClientService.ChatClientServiceClient> clientMap 
             p.StartInfo.Arguments = $" /c start {filename} {request.Id} {request.Url} {request.MinDelay} {request.MaxDelay}";
             r = p.Start();
 
+            Console.WriteLine("Process started.");
             return new CreateServerReply { Ok = r };
         }
 

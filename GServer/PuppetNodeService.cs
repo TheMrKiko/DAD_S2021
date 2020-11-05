@@ -25,10 +25,10 @@ namespace GS
 
         public override Task<RegisterPartitionsReply> RegisterPartitions(RegisterPartitionsRequest request, ServerCallContext context)
         {
-            Console.WriteLine("Deadline: " + context.Deadline);
-            Console.WriteLine("Host: " + context.Host);
-            Console.WriteLine("Method: " + context.Method);
-            Console.WriteLine("Peer: " + context.Peer);
+            Console.WriteLine();
+            Console.WriteLine("--- Server ---");
+            Console.WriteLine("Master says there are new servers");
+            Console.WriteLine("-- As in: "+ request);
 
             foreach (PartitionInfo partition in request.Info)
                 this.serverService.StorePartition(partition.PartitionId, new List<string>(partition.ServerIds.ToList()));

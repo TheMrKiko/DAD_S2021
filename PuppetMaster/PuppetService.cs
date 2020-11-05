@@ -13,11 +13,17 @@ namespace PuppetMaster
 
         public override Task<GetPartitionsReply> GetPartitionsInfo(GetPartitionsRequest request, ServerCallContext context)
         {
+            Console.WriteLine();
+            Console.WriteLine("--- Master ---");
+            Console.WriteLine("Some node asked to " + context.Method);
             return Task.FromResult(this.clientLogic.PartitionsInfo(request));
         }
 
         public override Task<GetServersInfoReply> GetServersInfo(GetServersInfoRequest request, ServerCallContext context)
         {
+            Console.WriteLine();
+            Console.WriteLine("--- Master ---");
+            Console.WriteLine("Some node asked to " + context.Method);
             return Task.FromResult(this.clientLogic.ServersInfo(request));
         }
 

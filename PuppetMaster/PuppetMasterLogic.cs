@@ -53,6 +53,7 @@ namespace PuppetMaster
                 Ports = { new ServerPort(serverHostname, serverPort, ServerCredentials.Insecure) }
             };
             server.Start();
+            Console.WriteLine("Insecure ChatServer server listening on port " + serverPort);
         }
 
         public void ExecuteCommands()
