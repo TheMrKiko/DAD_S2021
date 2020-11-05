@@ -36,8 +36,7 @@ namespace PuppetMaster
         {
             this.hostname = serverHostname;
             this.guiWindow = guiWindow;
-            AppContext.SetSwitch(
-  "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             server = new Server
             {
                 Services = { PuppetMasterService.BindService(new PuppetService(this)) },

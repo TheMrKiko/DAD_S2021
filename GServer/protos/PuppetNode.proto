@@ -1,6 +1,6 @@
 ﻿syntax = "proto3";
 
-service PuppetNodeService {
+service PNodeService {
   rpc RegisterServer (RegisterServerRequest) returns (RegisterServerReply);
   rpc RegisterPartition (RegisterPartitionRequest) returns (RegisterPartitionReply);
   rpc Status (StatusRequest) returns (StatusReply);

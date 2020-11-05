@@ -3,14 +3,14 @@ using System.Threading.Tasks;
 
 namespace GC
 {
-    public class ClientService : GClientService.GClientServiceBase {
+    public class GClientService : GCService.GCServiceBase {
         IClientGUI clientLogic;
 
-        public ClientService(IClientGUI clientLogic) {
+        public GClientService(IClientGUI clientLogic) {
             this.clientLogic = clientLogic;
         }
 
-        public override Task<RecvMsgReply> RecvMsg(
+        public Task<RecvMsgReply> RecvMsg(
             RecvMsgRequest request, ServerCallContext context) {
             return Task.FromResult(UpdateGUIwithMsg(request));
         }

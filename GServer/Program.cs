@@ -28,7 +28,7 @@ namespace GS
 
             Server server = new Server
             {
-                Services = { GServerService.BindService(new ServerService()) },
+                Services = { GSService.BindService(new GServerService()) },
                 Ports = { serverPort }
             };
 

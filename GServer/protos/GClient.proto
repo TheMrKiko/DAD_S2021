@@ -1,6 +1,6 @@
 ﻿syntax = "proto3";
 
-service GClientService {
+service GCService {
   //rpc RecvMsg (RecvMsgRequest) returns (RecvMsgReply);
 }
 

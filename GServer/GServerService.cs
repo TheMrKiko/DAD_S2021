@@ -8,15 +8,15 @@ namespace GS
 {
     // ChatServerService is the namespace defined in the protobuf
     // ChatServerServiceBase is the generated base implementation of the service
-    public class ServerService : GServerService.GServerServiceBase
+    public class GServerService : GSService.GSServiceBase
     {
         private GrpcChannel channel;
-        private Dictionary<string, ChatClientService.ChatClientServiceClient> clientMap =
-            new Dictionary<string, ChatClientService.ChatClientServiceClient>();
+        //private Dictionary<string, ChatClientService.ChatClientServiceClient> clientMap =
+          //  new Dictionary<string, ChatClientService.ChatClientServiceClient>();
 
         private Dictionary<string, string> data = new Dictionary<string, string>();
 
-        public ServerService()
+        public GServerService()
         {
         }
 

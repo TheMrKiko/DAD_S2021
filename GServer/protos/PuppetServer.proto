@@ -1,6 +1,6 @@
 ﻿syntax = "proto3";
 
-service PuppetServerService {
+service PServerService {
   rpc Crash (CrashRequest) returns (CrashReply);
   rpc Freeze (FreezeRequest) returns (FreezeReply);
   rpc Unfreeze (UnfreezeRequest) returns (UnfreezeReply);

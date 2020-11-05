@@ -1,6 +1,6 @@
 ﻿syntax = "proto3";
 
-service GServerService {
+service GSService {
   rpc ReadServer (ReadServerRequest) returns (ReadServerReply);
   rpc WriteServer (WriteServerRequest) returns (WriteServerReply);
   //rpc ListServer (ListServerRequest) returns (ListServerReply);

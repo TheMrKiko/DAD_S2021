@@ -39,7 +39,7 @@ namespace GC
             // setup the client service
             server = new Server
             {
-                Services = { GClientService.BindService(new ClientService(this)) },
+                Services = { GCService.BindService(new GClientService(this)) },
                 Ports = { new ServerPort(hostname, port, ServerCredentials.Insecure) }
             };
 
@@ -67,7 +67,7 @@ namespace GC
             // setup the client service
             server = new Server
             {
-                Services = { ChatClientService.BindService(new ClientService(this)) },
+                Services = { ChatClientService.BindService(new GClientService(this)) },
                 Ports = { new ServerPort(hostname, Int32.Parse(port), ServerCredentials.Insecure) }
             };
             server.Start();
