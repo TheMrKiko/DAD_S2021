@@ -25,6 +25,7 @@ namespace GS
 
         public override Task<ReadServerReply> ReadServer(ReadServerRequest request, ServerCallContext context)
         {
+            Console.WriteLine("--- SERVER ---");
             Console.WriteLine("Deadline: " + context.Deadline);
             Console.WriteLine("Host: " + context.Host);
             Console.WriteLine("Method: " + context.Method);
@@ -34,6 +35,7 @@ namespace GS
 
         public override Task<WriteServerReply> WriteServer(WriteServerRequest request, ServerCallContext context)
         {
+            Console.WriteLine("--- SERVER ---");
             Console.WriteLine("Deadline: " + context.Deadline);
             Console.WriteLine("Host: " + context.Host);
             Console.WriteLine("Method: " + context.Method);

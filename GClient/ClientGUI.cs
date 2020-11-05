@@ -16,25 +16,27 @@ namespace GC {
             clientLogic = new ClientLogic(this, username, url, file);
         }
 
-        private void btReg_Click(object sender, EventArgs e) {
-            /*foreach (string nick in clientLogic.Register(tbNick.Text, tbPort.Text)) {
-                tbRegResult.Text += nick + "\r\n";
-            }*/
-            tbNick.Enabled = false;
-            tbPort.Enabled = false;
-        }
-
-        public void AddMsgtoGUI(string m) { tbConv.Text += m + "\r\n"; }
+        public void AddMsgtoGUI(string m) { logs.Text += m + "\r\n"; }
 
         private void form1_Closing(object sender, FormClosingEventArgs e) {
             clientLogic.ServerShutdown();
         }
 
-        private async void btSend_Click(object sender, EventArgs e) {
-            string m = tbMsg.Text;
+        private async void btRead_Click(object sender, EventArgs e) {
+            string m = newvalue.Text;
+
             //await clientLogic.BcastMsg(m);
-            tbConv.Text += "me: " + tbMsg.Text + "\r\n";
-            tbMsg.Text = "";
+            /*tbConv.Text += "me: " + tbMsg.Text + "\r\n";
+            tbMsg.Text = "";*/
+            clientLogic.ReadObject(pid.Text, objid.Text, serverid.Text);
+        }
+
+        private void btWrite_Click(object sender, EventArgs e)
+        {
+            /*foreach (string nick in clientLogic.Register(tbNick.Text, tbPort.Text)) {
+                tbRegResult.Text += nick + "\r\n";
+            }*/
+            clientLogic.WriteObject(pid.Text, objid.Text, newvalue.Text);
         }
     }
 }

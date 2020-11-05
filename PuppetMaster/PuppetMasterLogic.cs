@@ -68,7 +68,7 @@ namespace PuppetMaster
         {
             Uri uri = new Uri(url);
             pcschannel = GrpcChannel.ForAddress($"http://{uri.Host}:10000");
-            pcs = new ProcessCreationService.ProcessCreationServiceClient(channel);
+            pcs = new ProcessCreationService.ProcessCreationServiceClient(pcschannel);
             CreateServerReply reply = pcs.CreateServer(
                 new CreateServerRequest { Id = id, Url = url, MinDelay = min_delay, MaxDelay = max_delay });
 
@@ -118,7 +118,7 @@ namespace PuppetMaster
 
             Uri uri = new Uri(url);
             pcschannel = GrpcChannel.ForAddress($"http://{uri.Host}:10000");
-            pcs = new ProcessCreationService.ProcessCreationServiceClient(channel);
+            pcs = new ProcessCreationService.ProcessCreationServiceClient(pcschannel);
             CreateClientReply reply = pcs.CreateClient(
                 new CreateClientRequest { Username = username, Url = url, ScriptFile = script_file });
 
@@ -136,6 +136,7 @@ namespace PuppetMaster
                     pinfo.ServerIds.Add(partitions[p]);
                     req.Info.Add(pinfo);
                 }
+                Console.ReadKey();
                 pns.RegisterPartitions(req);
 
                 RegisterServersRequest reqs = new RegisterServersRequest();

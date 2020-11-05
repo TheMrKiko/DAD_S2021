@@ -15,7 +15,7 @@ namespace GC
 {
     public interface IClientGUI
     {
-        //bool AddMsgtoGUI(string s);
+        bool AddMsgtoGUI(string s);
     }
     public class ClientLogic : IClientGUI
     {
@@ -50,12 +50,45 @@ namespace GC
 
         }
 
+        public void ReadObject(string part_id, string obj_id, string server_id)
+        {
+            string reply;
+            ReadServerRequest request = new ReadServerRequest { PartitionId = part_id, ObjectId = obj_id };
+            if (client == null)
+            {
+                partitionList.TryGetValue(part_id, out List<string> servers);
+                ConnectToServer(servers[0]);
+            }
+            reply = client.ReadServer(request).Object.Value;
+
+            if (reply == "N/A")
+            {
+                ConnectToServer(server_id);
+            }
+            reply = client.ReadServer(request).Object.Value;
+            AddMsgtoGUI($"Read: {reply}");
+        }
+
+        public void WriteObject(string part_id, string obj_id, string new_value)
+        {
+            bool reply;
+            WriteServerRequest request = new WriteServerRequest { PartitionId = part_id, ObjectId = obj_id, NewObject= new Object { Value = new_value } };
+
+            partitionList.TryGetValue(part_id, out List<string> servers);
+            ConnectToServer(servers[0]);
+
+            reply = client.WriteServer(request).Ok;
+            AddMsgtoGUI($"Write: {reply}");
+        }
+       
+
         public void ConnectToServer(string id)
         {
             // setup the client side
+            if (channel != null)
+                channel.Dispose();
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             channel = GrpcChannel.ForAddress(serverList[id]);
-
             client = new GSService.GSServiceClient(channel);
         }
 
@@ -63,20 +96,22 @@ namespace GC
         {
             lock (this)
                 this.serverList.Add(id, url);
+            AddMsgtoGUI(id);
         }
 
         public void StorePartition(string partitionId, List<string> serverIds)
         {
             lock (this)
                 this.partitionList.Add(partitionId, serverIds);
+            AddMsgtoGUI(partitionId);
         }
 
-        /*public bool AddMsgtoGUI(string s) {
+        public bool AddMsgtoGUI(string s) {
             this.guiWindow.BeginInvoke(new DelAddMsg(guiWindow.AddMsgtoGUI), new object[] { s });
             return true;
         }
 
-        public List<string> Register(string username, string port) {
+        /*public List<string> Register(string username, string port) {
             this.username = username;
             // setup the client service
             server = new Server

@@ -19,6 +19,7 @@ private Dictionary<string, ChatClientService.ChatClientServiceClient> clientMap 
 
         public override Task<CreateClientReply> CreateClient(CreateClientRequest request, ServerCallContext context)
         {
+            Console.WriteLine("--- PCS ---");
             Console.WriteLine("Deadline: " + context.Deadline);
             Console.WriteLine("Host: " + context.Host);
             Console.WriteLine("Method: " + context.Method);
@@ -28,6 +29,7 @@ private Dictionary<string, ChatClientService.ChatClientServiceClient> clientMap 
 
         public override Task<CreateServerReply> CreateServer(CreateServerRequest request, ServerCallContext context)
         {
+            Console.WriteLine("--- PCS ---");
             Console.WriteLine("Deadline: " + context.Deadline);
             Console.WriteLine("Host: " + context.Host);
             Console.WriteLine("Method: " + context.Method);
@@ -39,8 +41,9 @@ private Dictionary<string, ChatClientService.ChatClientServiceClient> clientMap 
         {
             Process p = new Process();
             bool r;
-            p.StartInfo.FileName = "../../../../GClient/bin/debug/netcoreapp3.1/GClient";
-            p.StartInfo.Arguments = $"{request.Username} {request.Url} {request.ScriptFile}";
+            const string filename = "../../../../GClient/bin/debug/netcoreapp3.1/GClient";
+            p.StartInfo.FileName = "cmd.exe";
+            p.StartInfo.Arguments = $" /c start {filename} {request.Username} {request.Url} {request.ScriptFile}";
             r = p.Start();
 
             return new CreateClientReply { Ok = r };
@@ -51,8 +54,8 @@ private Dictionary<string, ChatClientService.ChatClientServiceClient> clientMap 
             Process p = new Process();
             bool r;
             const string filename = "../../../../GServer/bin/debug/netcoreapp3.1/GServer";
-            p.StartInfo.FileName = filename;
-            p.StartInfo.Arguments = $"{request.Id} {request.Url} {request.MinDelay} {request.MaxDelay}";
+            p.StartInfo.FileName = "cmd.exe";
+            p.StartInfo.Arguments = $" /c start {filename} {request.Id} {request.Url} {request.MinDelay} {request.MaxDelay}";
             r = p.Start();
 
             return new CreateServerReply { Ok = r };

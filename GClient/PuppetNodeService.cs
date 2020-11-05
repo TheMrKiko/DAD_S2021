@@ -28,6 +28,7 @@ namespace GC
             Console.WriteLine("Host: " + context.Host);
             Console.WriteLine("Method: " + context.Method);
             Console.WriteLine("Peer: " + context.Peer);
+            Console.WriteLine("RegP: " + request.Info);
 
             foreach (PartitionInfo partition in request.Info)
                 this.clientLogic.StorePartition(partition.PartitionId, new List<string>(partition.ServerIds.ToList()));

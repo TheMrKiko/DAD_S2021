@@ -15,7 +15,6 @@ namespace GC {
             string username = args[0];
             string url = args[1];
             string file = args[2];
-
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
