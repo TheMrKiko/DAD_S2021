@@ -22,27 +22,30 @@ namespace GC
             this.clientLogic = clientLogic;
         }
 
-        public override Task<RegisterPartitionReply> RegisterPartition(RegisterPartitionRequest request, ServerCallContext context)
+        public override Task<RegisterPartitionsReply> RegisterPartitions(RegisterPartitionsRequest request, ServerCallContext context)
         {
             Console.WriteLine("Deadline: " + context.Deadline);
             Console.WriteLine("Host: " + context.Host);
             Console.WriteLine("Method: " + context.Method);
             Console.WriteLine("Peer: " + context.Peer);
 
-            this.clientLogic.StorePartition(request.PartitionId, new List<string>(request.ServerIds.ToList()));
-            return Task.FromResult(new RegisterPartitionReply());
+            foreach (PartitionInfo partition in request.Info)
+                this.clientLogic.StorePartition(partition.PartitionId, new List<string>(partition.ServerIds.ToList()));
+
+            return Task.FromResult(new RegisterPartitionsReply());
         }
 
-        public override Task<RegisterServerReply> RegisterServer(RegisterServerRequest request, ServerCallContext context)
+        public override Task<RegisterServersReply> RegisterServers(RegisterServersRequest request, ServerCallContext context)
         {
             Console.WriteLine("Deadline: " + context.Deadline);
             Console.WriteLine("Host: " + context.Host);
             Console.WriteLine("Method: " + context.Method);
             Console.WriteLine("Peer: " + context.Peer);
 
-            this.clientLogic.StoreServer(request.Id, request.Url);
+            foreach (ServerInfo server in request.Info)
+                this.clientLogic.StoreServer(server.Id, server.Url);
 
-            return Task.FromResult(new RegisterServerReply());
+            return Task.FromResult(new RegisterServersReply());
         }
 
         public override Task<StatusReply> Status(StatusRequest request, ServerCallContext context)
@@ -50,7 +53,7 @@ namespace GC
             return base.Status(request, context);
         }
 
-        
+
 
 
 

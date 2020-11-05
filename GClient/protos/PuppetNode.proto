@@ -1,23 +1,29 @@
 ﻿syntax = "proto3";
 
 service PNodeService {
-  rpc RegisterServer (RegisterServerRequest) returns (RegisterServerReply);
-  rpc RegisterPartition (RegisterPartitionRequest) returns (RegisterPartitionReply);
-  rpc Status (StatusRequest) returns (StatusReply);
+    rpc RegisterServers (RegisterServersRequest) returns (RegisterServersReply);
+    rpc RegisterPartitions (RegisterPartitionsRequest) returns (RegisterPartitionsReply);
+    rpc Status (StatusRequest) returns (StatusReply);
 }
-message RegisterServerRequest {
-  string id = 1;
-  string url = 2;	
+message RegisterServersRequest {
+    repeated ServerInfo info = 1;
 }
-message RegisterServerReply {
+message RegisterServersReply {
 }
-message RegisterPartitionRequest {
-  string partition_id = 1;
-  repeated string server_ids = 2;
+message RegisterPartitionsRequest {
+    repeated PartitionInfo info = 1;
 }
-message RegisterPartitionReply {
+message RegisterPartitionsReply {
 }
 message StatusRequest {
 }
 message StatusReply {
+}
+message PartitionInfo {
+    string partition_id = 1;
+    repeated string server_ids = 2;
+}
+message ServerInfo {
+    string id = 1;
+    string url = 2;
 }

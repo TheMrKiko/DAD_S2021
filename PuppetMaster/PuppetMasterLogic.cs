@@ -23,7 +23,8 @@ namespace PuppetMaster
         //private PuppetMasterService.PuppetMasterServiceClient gclient;
         //private PuppetMasterService.PuppetMasterServiceClient client;
         private GServerService.GServerServiceClient gserver;
-        private PNodeService.PNodeServiceClient pnserver;
+        private GCService.GCServiceClient gclient;
+        private PNodeService.PNodeServiceClient pns;
         private ProcessCreationService.ProcessCreationServiceClient pcs;
         private Server server;
         private readonly PuppetMasterGUI guiWindow;
@@ -32,8 +33,10 @@ namespace PuppetMaster
         private readonly Dictionary<string, List<string>> partitions = new Dictionary<string, List<string>>();
 
         //private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
-        private Dictionary<string, (GServerService.GServerServiceClient, PNodeService.PNodeServiceClient)> serverMap =
-            new Dictionary<string, (GServerService.GServerServiceClient, PNodeService.PNodeServiceClient)>();
+        private Dictionary<string, (string, GServerService.GServerServiceClient, PNodeService.PNodeServiceClient)> serverMap =
+            new Dictionary<string, (string, GServerService.GServerServiceClient, PNodeService.PNodeServiceClient)>();
+        private Dictionary<string, (string, GCService.GCServiceClient, PNodeService.PNodeServiceClient)> clientMap =
+            new Dictionary<string, (string, GCService.GCServiceClient, PNodeService.PNodeServiceClient)>();
 
         public PuppetMasterLogic(PuppetMasterGUI guiWindow, string serverHostname, int serverPort)
         {
@@ -46,8 +49,8 @@ namespace PuppetMaster
                 Ports = { new ServerPort(serverHostname, serverPort, ServerCredentials.Insecure) }
             };
             server.Start();
-            
-            
+
+
         }
 
         public void ReplicationFactor(int r)
@@ -73,28 +76,37 @@ namespace PuppetMaster
             {
                 channel = GrpcChannel.ForAddress(url);
                 gserver = new GServerService.GServerServiceClient(channel);
-                pnserver = new PNodeService.PNodeServiceClient(channel);
+                pns = new PNodeService.PNodeServiceClient(channel);
 
-                RegisterPartitionRequest req;
+                RegisterPartitionsRequest req = new RegisterPartitionsRequest();
+                PartitionInfo pinfo;
                 foreach (string p in partitions.Keys)
                 {
-                    req = new RegisterPartitionRequest { PartitionId = p };
-                    req.ServerIds.Add(partitions[p]);
-                    pnserver.RegisterPartition(req);
+                    pinfo = new PartitionInfo { PartitionId = p };
+                    pinfo.ServerIds.Add(partitions[p]);
+                    req.Info.Add(pinfo);
                 }
+                pns.RegisterPartitions(req);
 
-                /*RegisterServerRequest reqs;
+                RegisterServersRequest reqs;
+
+                reqs = new RegisterServersRequest();
+                reqs.Info.Add(new ServerInfo { Id = id, Url = url });
+
                 foreach (string s in serverMap.Keys)
                 {
-                    foreach (string s1 in serverMap[s].ke)
-                    {
-                        reqs = new RegisterServerRequest { Id=s, Url=serverMap[s] };
-                    req.ServerIds.Add(partitions[p]);
-                    pnserver.RegisterServer(reqs);
-                }*/
+                    serverMap[s].Item3.RegisterServers(reqs);
+                }
+
+                reqs = new RegisterServersRequest();
+                foreach (string s1 in serverMap.Keys)
+                {
+                    reqs.Info.Add(new ServerInfo { Id = s1, Url = serverMap[s1].Item1 });
+                }
+                pns.RegisterServers(reqs);
 
                 lock (this)
-                    serverMap.Add(url, (gserver, pnserver));
+                    serverMap.Add(id, (url, gserver, pns));
 
             }
             //Console.WriteLine($"Registered client {request.Nick} with URL {request.Url}");
@@ -104,6 +116,39 @@ namespace PuppetMaster
         public void Client(string username, string url, string script_file)
         {
 
+            Uri uri = new Uri(url);
+            pcschannel = GrpcChannel.ForAddress($"http://{uri.Host}:10000");
+            pcs = new ProcessCreationService.ProcessCreationServiceClient(channel);
+            CreateClientReply reply = pcs.CreateClient(
+                new CreateClientRequest { Username = username, Url = url, ScriptFile = script_file });
+
+            if (reply.Ok)
+            {
+                channel = GrpcChannel.ForAddress(url);
+                gclient = new GCService.GCServiceClient(channel);
+                pns = new PNodeService.PNodeServiceClient(channel);
+
+                RegisterPartitionsRequest req = new RegisterPartitionsRequest();
+                PartitionInfo pinfo;
+                foreach (string p in partitions.Keys)
+                {
+                    pinfo = new PartitionInfo { PartitionId = p };
+                    pinfo.ServerIds.Add(partitions[p]);
+                    req.Info.Add(pinfo);
+                }
+                pns.RegisterPartitions(req);
+
+                RegisterServersRequest reqs = new RegisterServersRequest();
+                foreach (string s1 in serverMap.Keys)
+                {
+                    reqs.Info.Add(new ServerInfo { Id = s1, Url = serverMap[s1].Item1 });
+                }
+                pns.RegisterServers(reqs);
+
+                lock (this)
+                    clientMap.Add(username, (url, gclient, pns));
+
+            }
         }
 
         /*public bool AddMsgtoGUI(string s)
