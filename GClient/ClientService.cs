@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 
 namespace GC
 {
-    public class ClientService : ChatClientService.ChatClientServiceBase {
-        IChatClientService clientLogic;
+    public class ClientService : GClientService.GClientServiceBase {
+        IClientGUI clientLogic;
 
-        public ClientService(IChatClientService clientLogic) {
+        public ClientService(IClientGUI clientLogic) {
             this.clientLogic = clientLogic;
         }
 

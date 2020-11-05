@@ -13,7 +13,7 @@ namespace GC {
         ClientLogic clientLogic;
         public ClientGUI(string username, string url, string file) {
             InitializeComponent();
-            clientLogic = new ClientLogic(this, false, "localhost", 1001, "localhost");
+            clientLogic = new ClientLogic(this, username, url, file);
         }
 
         private void btReg_Click(object sender, EventArgs e) {

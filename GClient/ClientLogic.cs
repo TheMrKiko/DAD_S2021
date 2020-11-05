@@ -12,38 +12,58 @@ public delegate void DelAddMsg(string s);
 
 namespace GC
 {
-    public interface IChatClientService {
+    public interface IClientGUI
+    {
         bool AddMsgtoGUI(string s);
     }
-    public class ClientLogic : IChatClientService {
-        private readonly GrpcChannel channel;
-        private readonly ChatServerService.ChatServerServiceClient client;
-        private Server server;
+    public class ClientLogic : IClientGUI
+    {
         private readonly ClientGUI guiWindow;
-        private string nick;
-        private string hostname;
+        private readonly string username;
+        private readonly string hostname;
+        private readonly int port;
+        private readonly Server server;
+        private GrpcChannel channel;
+        private GServerService.GServerServiceClient client;
         private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
 
-        public ClientLogic(ClientGUI guiWindow, bool sec, string serverHostname, int serverPort, 
-                             string clientHostname) {
-            this.hostname = clientHostname;
-            this.guiWindow = guiWindow;
-            // setup the client side
+        public ClientLogic(ClientGUI guiWindow, string username, string url, string file)
+        {
 
-                AppContext.SetSwitch(
-                    "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-                channel = GrpcChannel.ForAddress("http://" + serverHostname + ":" + serverPort.ToString());
-   
-            client = new ChatServerService.ChatServerServiceClient(channel);
+            Uri uri = new Uri(url);
+            this.guiWindow = guiWindow;
+            this.hostname = uri.Host;
+            this.port = uri.Port;
+            this.username = username;
+
+            // setup the client service
+            server = new Server
+            {
+                Services = { GClientService.BindService(new ClientService(this)) },
+                Ports = { new ServerPort(hostname, port, ServerCredentials.Insecure) }
+            };
+
+            server.Start();
+
         }
 
-        public bool AddMsgtoGUI(string s) {
+        public void ConnectToServer()
+        {
+            // setup the client side
+
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            channel = GrpcChannel.ForAddress($"http://{uri.Host}:10000");
+
+            client = new GServerService.GServerServiceClient(channel);
+        }
+
+        /*public bool AddMsgtoGUI(string s) {
             this.guiWindow.BeginInvoke(new DelAddMsg(guiWindow.AddMsgtoGUI), new object[] { s });
             return true;
         }
 
-        public List<string> Register(string nick, string port) {
-            this.nick = nick;
+        public List<string> Register(string username, string port) {
+            this.username = username;
             // setup the client service
             server = new Server
             {
@@ -53,7 +73,7 @@ namespace GC
             server.Start();
             ChatClientRegisterReply reply = client.Register(new ChatClientRegisterRequest
             {
-                Nick = nick,
+                Nick = username,
                 Url = "http://localhost:" + port
             }) ;
             
@@ -70,12 +90,13 @@ namespace GC
                 reply = await lastMsgCall.ResponseAsync;          
             }
             lastMsgCall = client.BcastMsgAsync(new BcastMsgRequest { 
-                Nick = this.nick,
+                Nick = this.username,
                 Msg = m
             });
-        }
+        }*/
 
-        public void ServerShutdown() {
+        public void ServerShutdown()
+        {
             server.ShutdownAsync().Wait();
         }
     }
