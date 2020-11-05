@@ -105,7 +105,7 @@ namespace PuppetMaster
         public void Partitions(int n, string id, List<string> serverids)
         {
             lock (this)
-                partitions.Add(id, serverids);
+                partitions[id] = serverids;
         }
         public GetPartitionsReply PartitionsInfo(GetPartitionsRequest request)
         {
@@ -157,7 +157,7 @@ namespace PuppetMaster
                 }
 
                 lock (this)
-                    serverMap.Add(id, (url, gserver, pns));
+                    serverMap[id] = (url, gserver, pns);
 
             }
             //Console.WriteLine($"Registered server {request.Nick} with URL {request.Url}");
@@ -180,7 +180,7 @@ namespace PuppetMaster
                 pns = new PNodeService.PNodeServiceClient(channel);
 
                 lock (this)
-                    clientMap.Add(username, (url, gclient, pns));
+                    clientMap[username] = (url, gclient, pns);
 
             }
         }

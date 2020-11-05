@@ -82,13 +82,13 @@ namespace GS
         public void StoreServer(string id, string url)
         {
             lock (this)
-                this.serverList.Add(id, url);
+                this.serverList[id] = url;
         }
 
         public void StorePartition(string partitionId, List<string> serverIds)
         {
             lock (this)
-                this.partitionList.Add(partitionId, serverIds);
+                this.partitionList[partitionId] = serverIds;
         }
 
 
