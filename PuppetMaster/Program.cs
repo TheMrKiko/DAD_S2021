@@ -11,7 +11,7 @@ namespace PuppetMaster {
         /// </summary>
         [STAThread]
         static void Main() {
-            string[] args = Environment.GetCommandLineArgs().Skip(1).ToArray();
+            //string[] args = Environment.GetCommandLineArgs().Skip(1).ToArray();
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

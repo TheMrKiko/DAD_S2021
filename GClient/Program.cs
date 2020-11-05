@@ -11,7 +11,6 @@ namespace GC {
         /// </summary>
         [STAThread]
         static void Main(string[] args) {
-
             string username = args[0];
             string url = args[1];
             string file = args[2];

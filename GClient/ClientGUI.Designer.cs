@@ -77,7 +77,7 @@
             this.newvalue.Location = new System.Drawing.Point(89, 56);
             this.newvalue.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.newvalue.Name = "newvalue";
-            this.newvalue.Size = new System.Drawing.Size(256, 23);
+            this.newvalue.Size = new System.Drawing.Size(357, 23);
             this.newvalue.TabIndex = 6;
             // 
             // lbP
@@ -121,7 +121,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(351, 38);
+            this.label1.Location = new System.Drawing.Point(351, 3);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(53, 15);
             this.label1.TabIndex = 9;
@@ -129,7 +129,7 @@
             // 
             // serverid
             // 
-            this.serverid.Location = new System.Drawing.Point(351, 56);
+            this.serverid.Location = new System.Drawing.Point(351, 21);
             this.serverid.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.serverid.Name = "serverid";
             this.serverid.Size = new System.Drawing.Size(95, 23);

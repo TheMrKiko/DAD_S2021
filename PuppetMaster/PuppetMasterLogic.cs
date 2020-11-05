@@ -50,7 +50,50 @@ namespace PuppetMaster
             };
             server.Start();
 
+            ExecuteCommands();
 
+        }
+
+        private void ExecuteCommands()
+        {
+            // Read the file and display it line by line.  
+            string line; string[] split;
+            System.IO.StreamReader file = new System.IO.StreamReader(@"./sample_pm_script.txt");
+            while ((line = file.ReadLine()) != null)
+            {
+                System.Console.WriteLine(line);
+                split = line.Split();
+                switch (split[0])
+                {
+                    case "ReplicationFactor":
+                        ReplicationFactor(int.Parse(split[1]));
+                        break;
+                    case "Partition":
+                        Partitions(int.Parse(split[1]), split[2], split.Skip(3).ToList());
+                        break;
+                    case "Server":
+                        Server(split[1], split[2], int.Parse(split[3]), int.Parse(split[4]));
+                        break;
+                    case "Client":
+                        Client(split[1], split[2], split[3]);
+                        break;
+                    case "Status":
+                        break;
+                    case "Wait 2000":
+                        break;
+                    case "Freeze s1":
+                        break;
+                    case "Unfreeze s1":
+                        break;
+                    case "Crash s2":
+                        break;
+                    default:
+                        Console.WriteLine("Default case");
+                        break;
+                }
+            }
+
+            file.Close();
         }
 
         public void ReplicationFactor(int r)
@@ -86,6 +129,7 @@ namespace PuppetMaster
                     pinfo.ServerIds.Add(partitions[p]);
                     req.Info.Add(pinfo);
                 }
+                Console.ReadKey();
                 pns.RegisterPartitions(req);
 
                 RegisterServersRequest reqs;

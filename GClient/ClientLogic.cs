@@ -22,6 +22,7 @@ namespace GC
         private readonly ClientGUI guiWindow;
         private readonly string username;
         private readonly string hostname;
+        private readonly string file;
         private readonly int port;
         private readonly Server server;
         private readonly Dictionary<string, string> serverList = new Dictionary<string, string>();
@@ -38,6 +39,7 @@ namespace GC
             this.hostname = uri.Host;
             this.port = uri.Port;
             this.username = username;
+            this.file = file;
 
             // setup the client service
             server = new Server
@@ -48,6 +50,46 @@ namespace GC
 
             server.Start();
 
+            ExecuteCommands();
+        }
+
+        private void ExecuteCommands()
+        {
+            // Read the file and display it line by line.  
+            string line; string[] split;
+            System.IO.StreamReader file = new System.IO.StreamReader(@$"../../../../GClient/bin/debug/netcoreapp3.1/{this.file}.txt");
+            while ((line = file.ReadLine()) != null)
+            {
+                System.Console.WriteLine(line);
+                split = line.Split();
+                switch (split[0])
+                {
+                    case "write":
+                        WriteObject(split[1], split[2], line.Split('"')[1]); //write p1 obj -$i "value-$i"
+                        break;
+                    case "read":
+                        ReadObject(split[1], split[2], split[3]);
+                        break;
+                    case "listServer":
+                        //listServer s1
+                        break;
+                    case "wait":
+                        //2009
+                        break;
+                    case "begin-repeat":
+                        //5
+                        break;
+                    case "end-repeat":
+                        break;
+                    case "listGlobal":
+                        break;
+                    default:
+                        Console.WriteLine("Default case");
+                        break;
+                }
+            }
+
+            file.Close();
         }
 
         public void ReadObject(string part_id, string obj_id, string server_id)
@@ -72,7 +114,7 @@ namespace GC
         public void WriteObject(string part_id, string obj_id, string new_value)
         {
             bool reply;
-            WriteServerRequest request = new WriteServerRequest { PartitionId = part_id, ObjectId = obj_id, NewObject= new Object { Value = new_value } };
+            WriteServerRequest request = new WriteServerRequest { PartitionId = part_id, ObjectId = obj_id, NewObject = new Object { Value = new_value } };
 
             partitionList.TryGetValue(part_id, out List<string> servers);
             ConnectToServer(servers[0]);
@@ -80,7 +122,7 @@ namespace GC
             reply = client.WriteServer(request).Ok;
             AddMsgtoGUI($"Write: {reply}");
         }
-       
+
 
         public void ConnectToServer(string id)
         {
@@ -106,7 +148,8 @@ namespace GC
             AddMsgtoGUI(partitionId);
         }
 
-        public bool AddMsgtoGUI(string s) {
+        public bool AddMsgtoGUI(string s)
+        {
             this.guiWindow.BeginInvoke(new DelAddMsg(guiWindow.AddMsgtoGUI), new object[] { s });
             return true;
         }
