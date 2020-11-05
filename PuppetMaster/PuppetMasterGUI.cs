@@ -48,17 +48,22 @@ namespace PuppetMaster {
 
         private void P_send_Click(object sender, EventArgs e)
         {
+            int n = int.Parse(p_n.Text);
+            List<string> lines = p_serverids.Lines.ToList();
 
+            puppetLogic.Partitions(n, p_id.Text, lines);
         }
 
         private void Se_send_Click(object sender, EventArgs e)
         {
-            puppetLogic.Server("h", s_url.Text, 1, 1);
+            int i = int.Parse(s_min.Text);
+            int a = int.Parse(s_max.Text);
+            puppetLogic.Server(s_id.Text, s_url.Text, i, a);
         }
 
         private void C_send_Click(object sender, EventArgs e)
         {
-
+            puppetLogic.Client(c_username.Text, c_url.Text, c_file.Text);
         }
     }
 }

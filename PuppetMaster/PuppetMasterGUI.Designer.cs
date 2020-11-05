@@ -25,7 +25,7 @@
         private void InitializeComponent() {
             this.lbPeerList = new System.Windows.Forms.Label();
             this.lbConv = new System.Windows.Forms.Label();
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.p_n = new System.Windows.Forms.TextBox();
             this.p_serverids = new System.Windows.Forms.TextBox();
             this.p_id = new System.Windows.Forms.TextBox();
             this.r_r = new System.Windows.Forms.TextBox();
@@ -62,13 +62,13 @@
             this.lbConv.TabIndex = 10;
             this.lbConv.Text = "1. Replicate Factor";
             // 
-            // textBox2
+            // p_n
             // 
-            this.textBox2.Location = new System.Drawing.Point(176, 42);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.PlaceholderText = "Nº replicas";
-            this.textBox2.Size = new System.Drawing.Size(64, 23);
-            this.textBox2.TabIndex = 11;
+            this.p_n.Location = new System.Drawing.Point(176, 42);
+            this.p_n.Name = "p_n";
+            this.p_n.PlaceholderText = "Nº replicas";
+            this.p_n.Size = new System.Drawing.Size(64, 23);
+            this.p_n.TabIndex = 11;
             // 
             // p_serverids
             // 
@@ -232,7 +232,7 @@
             this.Controls.Add(this.r_r);
             this.Controls.Add(this.p_id);
             this.Controls.Add(this.p_serverids);
-            this.Controls.Add(this.textBox2);
+            this.Controls.Add(this.p_n);
             this.Controls.Add(this.lbConv);
             this.Controls.Add(this.lbPeerList);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -247,7 +247,7 @@
         #endregion
         private System.Windows.Forms.Label lbPeerList;
         private System.Windows.Forms.Label lbConv;
-        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.TextBox p_n;
         private System.Windows.Forms.TextBox p_serverids;
         private System.Windows.Forms.TextBox p_id;
         private System.Windows.Forms.TextBox r_r;
