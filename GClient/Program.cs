@@ -18,6 +18,8 @@ namespace GC {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new ClientGUI(username, url, file));
+
+            while (true) ;
         }
     }
 }

@@ -10,12 +10,15 @@ namespace PuppetMaster {
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main() {
-            //string[] args = Environment.GetCommandLineArgs().Skip(1).ToArray();
+        static void Main(string[] args)
+        {
+            string file = args[0];
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new PuppetMasterGUI());
+            Application.Run(new PuppetMasterGUI(file));
+
+            while(true);
         }
     }
 }

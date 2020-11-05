@@ -1,13 +1,24 @@
 ﻿using Grpc.Core;
+using System;
 using System.Threading.Tasks;
 
 namespace PuppetMaster
 {
-    public class PuppetService : PuppetMasterService.PuppetMasterServiceBase {
+    public class PuppetService : PMasterService.PMasterServiceBase {
         IPuppetMasterGUI clientLogic;
 
         public PuppetService(IPuppetMasterGUI clientLogic) {
             this.clientLogic = clientLogic;
+        }
+
+        public override Task<GetPartitionsReply> GetPartitionsInfo(GetPartitionsRequest request, ServerCallContext context)
+        {
+            return Task.FromResult(this.clientLogic.PartitionsInfo(request));
+        }
+
+        public override Task<GetServersInfoReply> GetServersInfo(GetServersInfoRequest request, ServerCallContext context)
+        {
+            return Task.FromResult(this.clientLogic.ServersInfo(request));
         }
 
         /*public override Task<RecvMsgReply> RecvMsg(

@@ -14,6 +14,7 @@ namespace GC {
         public ClientGUI(string username, string url, string file) {
             InitializeComponent();
             clientLogic = new ClientLogic(this, username, url, file);
+            Task.Run(() => clientLogic.ExecuteCommands());
         }
 
         public void AddMsgtoGUI(string m) { logs.Text += m + "\r\n"; }

@@ -29,6 +29,7 @@ namespace GC
         private readonly Dictionary<string, List<string>> partitionList = new Dictionary<string, List<string>>();
         private GrpcChannel channel;
         private GSService.GSServiceClient client;
+        private PMasterService.PMasterServiceClient pmc;
         //private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
 
         public ClientLogic(ClientGUI guiWindow, string username, string url, string file)
@@ -41,6 +42,8 @@ namespace GC
             this.username = username;
             this.file = file;
 
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
             // setup the client service
             server = new Server
             {
@@ -50,10 +53,10 @@ namespace GC
 
             server.Start();
 
-            ExecuteCommands();
+            GetInfoFromMaster();
         }
 
-        private void ExecuteCommands()
+        public void ExecuteCommands()
         {
             // Read the file and display it line by line.  
             string line; string[] split;
@@ -92,6 +95,27 @@ namespace GC
             file.Close();
         }
 
+        public void GetInfoFromMaster()
+        {
+            string local = "localhost";
+            channel = GrpcChannel.ForAddress($"http://{local}:10001");
+            pmc = new PMasterService.PMasterServiceClient(channel);
+            GetPartitionsReply repp = pmc.GetPartitionsInfo(new GetPartitionsRequest());
+            GetServersInfoReply reps = pmc.GetServersInfo(new GetServersInfoRequest());
+
+            foreach (PartitionInf partitionInf in repp.Info)
+            {
+                StorePartition(partitionInf.PartitionId, new List<string>(partitionInf.ServerIds.ToList()));
+            }
+
+            foreach (ServerInf serverInf in reps.Info)
+            {
+                StoreServer(serverInf.Id, serverInf.Url);
+            }
+            channel = null;
+        }
+
+
         public void ReadObject(string part_id, string obj_id, string server_id)
         {
             string reply;
@@ -103,11 +127,11 @@ namespace GC
             }
             reply = client.ReadServer(request).Object.Value;
 
-            if (reply == "N/A")
+            if (reply == "N/A" && server_id != "-1")
             {
                 ConnectToServer(server_id);
+                reply = client.ReadServer(request).Object.Value;
             }
-            reply = client.ReadServer(request).Object.Value;
             AddMsgtoGUI($"Read: {reply}");
         }
 
@@ -138,14 +162,12 @@ namespace GC
         {
             lock (this)
                 this.serverList.Add(id, url);
-            AddMsgtoGUI(id);
         }
 
         public void StorePartition(string partitionId, List<string> serverIds)
         {
             lock (this)
                 this.partitionList.Add(partitionId, serverIds);
-            AddMsgtoGUI(partitionId);
         }
 
         public bool AddMsgtoGUI(string s)

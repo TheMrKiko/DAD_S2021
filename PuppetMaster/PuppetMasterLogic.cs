@@ -16,6 +16,8 @@ namespace PuppetMaster
     public interface IPuppetMasterGUI
     {
         //bool AddMsgtoGUI(string s);
+        GetPartitionsReply PartitionsInfo(GetPartitionsRequest request);
+        GetServersInfoReply ServersInfo(GetServersInfoRequest request);
     }
     public class PuppetMasterLogic : IPuppetMasterGUI
     {
@@ -30,6 +32,7 @@ namespace PuppetMaster
         private readonly PuppetMasterGUI guiWindow;
         private string nick;
         private readonly string hostname;
+        private readonly string filename;
         private readonly Dictionary<string, List<string>> partitions = new Dictionary<string, List<string>>();
 
         //private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
@@ -38,27 +41,25 @@ namespace PuppetMaster
         private Dictionary<string, (string, GCService.GCServiceClient, PNodeService.PNodeServiceClient)> clientMap =
             new Dictionary<string, (string, GCService.GCServiceClient, PNodeService.PNodeServiceClient)>();
 
-        public PuppetMasterLogic(PuppetMasterGUI guiWindow, string serverHostname, int serverPort)
+        public PuppetMasterLogic(PuppetMasterGUI guiWindow, string serverHostname, int serverPort, string filename)
         {
             this.hostname = serverHostname;
             this.guiWindow = guiWindow;
+            this.filename = filename;
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             server = new Server
             {
-                Services = { PuppetMasterService.BindService(new PuppetService(this)) },
+                Services = { PMasterService.BindService(new PuppetService(this)) },
                 Ports = { new ServerPort(serverHostname, serverPort, ServerCredentials.Insecure) }
             };
             server.Start();
-
-            ExecuteCommands();
-
         }
 
-        private void ExecuteCommands()
+        public void ExecuteCommands()
         {
             // Read the file and display it line by line.  
             string line; string[] split;
-            System.IO.StreamReader file = new System.IO.StreamReader(@"./sample_pm_script.txt");
+            System.IO.StreamReader file = new System.IO.StreamReader($@"./{this.filename}.txt");
             while ((line = file.ReadLine()) != null)
             {
                 System.Console.WriteLine(line);
@@ -106,6 +107,30 @@ namespace PuppetMaster
             lock (this)
                 partitions.Add(id, serverids);
         }
+        public GetPartitionsReply PartitionsInfo(GetPartitionsRequest request)
+        {
+            GetPartitionsReply req = new GetPartitionsReply();
+            PartitionInf pinfo;
+            foreach (string p in partitions.Keys)
+            {
+                pinfo = new PartitionInf { PartitionId = p };
+                pinfo.ServerIds.Add(partitions[p]);
+                req.Info.Add(pinfo);
+            }
+            return req;
+        }
+
+        public GetServersInfoReply ServersInfo(GetServersInfoRequest request)
+        {
+            GetServersInfoReply reqs = new GetServersInfoReply();
+
+            foreach (string s1 in serverMap.Keys)
+            {
+                reqs.Info.Add(new ServerInf { Id = s1, Url = serverMap[s1].Item1 });
+            }
+            return reqs;
+
+        }
 
         public void Server(string id, string url, int min_delay, int max_delay)
         {
@@ -121,17 +146,6 @@ namespace PuppetMaster
                 gserver = new GServerService.GServerServiceClient(channel);
                 pns = new PNodeService.PNodeServiceClient(channel);
 
-                RegisterPartitionsRequest req = new RegisterPartitionsRequest();
-                PartitionInfo pinfo;
-                foreach (string p in partitions.Keys)
-                {
-                    pinfo = new PartitionInfo { PartitionId = p };
-                    pinfo.ServerIds.Add(partitions[p]);
-                    req.Info.Add(pinfo);
-                }
-                Console.ReadKey();
-                pns.RegisterPartitions(req);
-
                 RegisterServersRequest reqs;
 
                 reqs = new RegisterServersRequest();
@@ -142,18 +156,11 @@ namespace PuppetMaster
                     serverMap[s].Item3.RegisterServers(reqs);
                 }
 
-                reqs = new RegisterServersRequest();
-                foreach (string s1 in serverMap.Keys)
-                {
-                    reqs.Info.Add(new ServerInfo { Id = s1, Url = serverMap[s1].Item1 });
-                }
-                pns.RegisterServers(reqs);
-
                 lock (this)
                     serverMap.Add(id, (url, gserver, pns));
 
             }
-            //Console.WriteLine($"Registered client {request.Nick} with URL {request.Url}");
+            //Console.WriteLine($"Registered server {request.Nick} with URL {request.Url}");
 
         }
 
@@ -171,24 +178,6 @@ namespace PuppetMaster
                 channel = GrpcChannel.ForAddress(url);
                 gclient = new GCService.GCServiceClient(channel);
                 pns = new PNodeService.PNodeServiceClient(channel);
-
-                RegisterPartitionsRequest req = new RegisterPartitionsRequest();
-                PartitionInfo pinfo;
-                foreach (string p in partitions.Keys)
-                {
-                    pinfo = new PartitionInfo { PartitionId = p };
-                    pinfo.ServerIds.Add(partitions[p]);
-                    req.Info.Add(pinfo);
-                }
-                Console.ReadKey();
-                pns.RegisterPartitions(req);
-
-                RegisterServersRequest reqs = new RegisterServersRequest();
-                foreach (string s1 in serverMap.Keys)
-                {
-                    reqs.Info.Add(new ServerInfo { Id = s1, Url = serverMap[s1].Item1 });
-                }
-                pns.RegisterServers(reqs);
 
                 lock (this)
                     clientMap.Add(username, (url, gclient, pns));

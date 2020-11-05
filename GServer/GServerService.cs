@@ -2,6 +2,7 @@
 using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GS
@@ -11,6 +12,7 @@ namespace GS
     public class GServerService : GSService.GSServiceBase
     {
         private GrpcChannel channel;
+        private PMasterService.PMasterServiceClient pmc;
         //private Dictionary<string, ChatClientService.ChatClientServiceClient> clientMap =
           //  new Dictionary<string, ChatClientService.ChatClientServiceClient>();
 
@@ -22,6 +24,24 @@ namespace GS
         {
         }
 
+        public void GetInfoFromMaster()
+        {
+            string local = "localhost";
+            channel = GrpcChannel.ForAddress($"http://{local}:10001");
+            pmc = new PMasterService.PMasterServiceClient(channel);
+            GetPartitionsReply repp = pmc.GetPartitionsInfo(new GetPartitionsRequest());
+            GetServersInfoReply reps = pmc.GetServersInfo(new GetServersInfoRequest());
+
+            foreach (PartitionInf partitionInf in repp.Info)
+            {
+                StorePartition(partitionInf.PartitionId, new List<string>(partitionInf.ServerIds.ToList()));
+            }
+
+            foreach (ServerInf serverInf in reps.Info)
+            {
+                StoreServer(serverInf.Id, serverInf.Url);
+            }
+        }
 
         public override Task<ReadServerReply> ReadServer(ReadServerRequest request, ServerCallContext context)
         {

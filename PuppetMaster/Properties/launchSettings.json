@@ -1,8 +1,8 @@
 {
   "profiles": {
     "GClient": {
-      "commandName": "Project",
-      "commandLineArgs": "no-sec"
+        "commandName": "Project",
+        "commandLineArgs": "sample_pm_script"
     }
   }
 }
