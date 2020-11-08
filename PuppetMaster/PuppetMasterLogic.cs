@@ -33,13 +33,23 @@ namespace PuppetMaster
         private string nick;
         private readonly string hostname;
         private readonly string filename;
+        private ConfigSteps configStep;
         private readonly Dictionary<string, List<string>> partitions = new Dictionary<string, List<string>>();
+        enum ConfigSteps
+        {
+            ReplicateFactor,
+            Partition,
+            Server,
+            Client,
+            Commands
+        }
 
         //private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
         private Dictionary<string, (string, GServerService.GServerServiceClient, PNodeService.PNodeServiceClient)> serverMap =
             new Dictionary<string, (string, GServerService.GServerServiceClient, PNodeService.PNodeServiceClient)>();
         private Dictionary<string, (string, GCService.GCServiceClient, PNodeService.PNodeServiceClient)> clientMap =
             new Dictionary<string, (string, GCService.GCServiceClient, PNodeService.PNodeServiceClient)>();
+        private int nservers = 0;
 
         public PuppetMasterLogic(PuppetMasterGUI guiWindow, string serverHostname, int serverPort, string filename)
         {
@@ -68,15 +78,24 @@ namespace PuppetMaster
                 switch (split[0])
                 {
                     case "ReplicationFactor":
+                        configStep = ConfigSteps.ReplicateFactor;
                         ReplicationFactor(int.Parse(split[1]));
                         break;
                     case "Partition":
+                        configStep = ConfigSteps.Partition;
                         Partitions(int.Parse(split[1]), split[2], split.Skip(3).ToList());
                         break;
                     case "Server":
+                        configStep = ConfigSteps.Server;
                         Server(split[1], split[2], int.Parse(split[3]), int.Parse(split[4]));
                         break;
                     case "Client":
+                        if (configStep == ConfigSteps.Server)
+                        {
+                            while (nservers != 0) { }
+                        }
+                        Console.WriteLine("Servers informed.");
+                        configStep = ConfigSteps.Client;
                         Client(split[1], split[2], split[3]);
                         break;
                     case "Status":
@@ -129,6 +148,8 @@ namespace PuppetMaster
             {
                 reqs.Info.Add(new ServerInf { Id = s1, Url = serverMap[s1].Item1 });
             }
+            lock (this)
+                nservers -= 1;
             return reqs;
 
         }
@@ -158,7 +179,10 @@ namespace PuppetMaster
                 }
 
                 lock (this)
+                {
                     serverMap[id] = (url, gserver, pns);
+                    nservers += 1;
+                }
 
             }
             //Console.WriteLine($"Registered server {request.Nick} with URL {request.Url}");
