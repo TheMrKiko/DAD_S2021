@@ -16,8 +16,9 @@ namespace PuppetMaster
     public interface IPuppetMasterGUI
     {
         //bool AddMsgtoGUI(string s);
-        GetPartitionsReply PartitionsInfo(GetPartitionsRequest request);
-        GetServersInfoReply ServersInfo(GetServersInfoRequest request);
+        //GetPartitionsReply PartitionsInfo(GetPartitionsRequest request);
+        //GetServersInfoReply ServersInfo(GetServersInfoRequest request);
+        void Register();
     }
     public class PuppetMasterLogic : IPuppetMasterGUI
     {
@@ -45,7 +46,7 @@ namespace PuppetMaster
         }
 
         //private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
-        private Dictionary<string, (string, GServerService.GServerServiceClient, PNodeService.PNodeServiceClient)> serverMap =
+        private Dictionary<string, (string url, GServerService.GServerServiceClient sc, PNodeService.PNodeServiceClient pnc)> serverMap =
             new Dictionary<string, (string, GServerService.GServerServiceClient, PNodeService.PNodeServiceClient)>();
         private Dictionary<string, (string, GCService.GCServiceClient, PNodeService.PNodeServiceClient)> clientMap =
             new Dictionary<string, (string, GCService.GCServiceClient, PNodeService.PNodeServiceClient)>();
@@ -56,6 +57,12 @@ namespace PuppetMaster
             this.hostname = serverHostname;
             this.guiWindow = guiWindow;
             this.filename = filename;
+
+            StartPMServer(serverHostname, serverPort);
+        }
+
+        private void StartPMServer(string serverHostname, int serverPort)
+        {
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             server = new Server
             {
@@ -90,12 +97,6 @@ namespace PuppetMaster
                         Server(split[1], split[2], int.Parse(split[3]), int.Parse(split[4]));
                         break;
                     case "Client":
-                        if (configStep == ConfigSteps.Server)
-                        {
-                            while (nservers != 0) { }
-                        }
-                        Console.WriteLine("Servers informed.");
-                        configStep = ConfigSteps.Client;
                         Client(split[1], split[2], split[3]);
                         break;
                     case "Status":
@@ -117,6 +118,58 @@ namespace PuppetMaster
             file.Close();
         }
 
+        private void SyncConfig(ConfigSteps config)
+        {
+            switch (config)
+            {
+                case ConfigSteps.ReplicateFactor:
+                    break;
+                case ConfigSteps.Partition:
+                    break;
+                case ConfigSteps.Server:
+                    break;
+                case ConfigSteps.Client:
+
+                    if (configStep == ConfigSteps.Server)
+                    {
+                        while (nservers != 0) { /*await Task.Delay(100);*/ }
+                        Console.WriteLine("Servers alive. Informing them.");
+                        lock (this)
+                        {
+                            RegisterPartitionsRequest partitionsRequest = new RegisterPartitionsRequest();
+                            RegisterServersRequest serversRequest = new RegisterServersRequest();
+                            PartitionInfo pinfo;
+
+                            foreach (string p in partitions.Keys)
+                            {
+                                pinfo = new PartitionInfo { PartitionId = p };
+                                pinfo.ServerIds.Add(partitions[p]);
+                                partitionsRequest.Info.Add(pinfo);
+                            }
+
+                            foreach (string s_id in serverMap.Keys)
+                            {
+                                serversRequest.Info.Add(new ServerInfo { Id = s_id, Url = serverMap[s_id].url });
+                            }
+
+
+                            foreach (string s_id in serverMap.Keys)
+                            {
+                                serverMap[s_id].pnc.RegisterPartitionsAsync(partitionsRequest);
+                                serverMap[s_id].pnc.RegisterServersAsync(serversRequest);
+                            }
+                        }
+                    }
+
+                    configStep = ConfigSteps.Client;
+                    break;
+                case ConfigSteps.Commands:
+                    break;
+                default:
+                    break;
+            }
+        }
+
         public void ReplicationFactor(int r)
         {
             return;
@@ -127,7 +180,7 @@ namespace PuppetMaster
             lock (this)
                 partitions[id] = serverids;
         }
-        public GetPartitionsReply PartitionsInfo(GetPartitionsRequest request)
+        /*public GetPartitionsReply PartitionsInfo(GetPartitionsRequest request)
         {
             GetPartitionsReply req = new GetPartitionsReply();
             PartitionInf pinfo;
@@ -138,9 +191,15 @@ namespace PuppetMaster
                 req.Info.Add(pinfo);
             }
             return req;
+        }*/
+
+        public void Register()
+        {
+            lock (this)
+                nservers -= 1;
         }
 
-        public GetServersInfoReply ServersInfo(GetServersInfoRequest request)
+        /*public GetServersInfoReply ServersInfo(GetServersInfoRequest request)
         {
             GetServersInfoReply reqs = new GetServersInfoReply();
 
@@ -148,11 +207,10 @@ namespace PuppetMaster
             {
                 reqs.Info.Add(new ServerInf { Id = s1, Url = serverMap[s1].Item1 });
             }
-            lock (this)
-                nservers -= 1;
+            
             return reqs;
 
-        }
+        }*/
 
         public void Server(string id, string url, int min_delay, int max_delay)
         {
@@ -168,16 +226,6 @@ namespace PuppetMaster
                 gserver = new GServerService.GServerServiceClient(channel);
                 pns = new PNodeService.PNodeServiceClient(channel);
 
-                RegisterServersRequest reqs;
-
-                reqs = new RegisterServersRequest();
-                reqs.Info.Add(new ServerInfo { Id = id, Url = url });
-
-                foreach (string s in serverMap.Keys)
-                {
-                    serverMap[s].Item3.RegisterServers(reqs);
-                }
-
                 lock (this)
                 {
                     serverMap[id] = (url, gserver, pns);
@@ -191,6 +239,7 @@ namespace PuppetMaster
 
         public void Client(string username, string url, string script_file)
         {
+            SyncConfig(ConfigSteps.Client);
 
             Uri uri = new Uri(url);
             pcschannel = GrpcChannel.ForAddress($"http://{uri.Host}:10000");

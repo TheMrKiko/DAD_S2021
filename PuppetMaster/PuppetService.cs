@@ -6,20 +6,12 @@ namespace PuppetMaster
 {
     public class PuppetService : PMasterService.PMasterServiceBase {
         IPuppetMasterGUI clientLogic;
-        private System.Threading.EventWaitHandle ewh = new System.Threading.EventWaitHandle(false, System.Threading.EventResetMode.ManualReset);
 
         public PuppetService(IPuppetMasterGUI clientLogic) {
             this.clientLogic = clientLogic;
-            Task.Run(async () =>  {
-                Console.WriteLine("Start count");
-                await Task.Delay(20000);
-                Console.WriteLine("End count");
-                ewh.Set();
-            }
-            );
         }
 
-        public override Task<GetPartitionsReply> GetPartitionsInfo(GetPartitionsRequest request, ServerCallContext context)
+        /*public override Task<GetPartitionsReply> GetPartitionsInfo(GetPartitionsRequest request, ServerCallContext context)
         {
             Console.WriteLine();
             Console.WriteLine("--- Master ---");
@@ -32,9 +24,16 @@ namespace PuppetMaster
             Console.WriteLine();
             Console.WriteLine("--- Master ---");
             Console.WriteLine("Some node asked to " + context.Method);
-            ewh.WaitOne();
-            Console.WriteLine("bla");
             return Task.FromResult(this.clientLogic.ServersInfo(request));
+        }*/
+
+        public override Task<RegisterReply> Register(RegisterRequest request, ServerCallContext context)
+        {
+            Console.WriteLine();
+            Console.WriteLine("--- Master ---");
+            Console.WriteLine("Some node just registed.");
+            this.clientLogic.Register();
+            return Task.FromResult(new RegisterReply());
         }
 
         /*public override Task<RecvMsgReply> RecvMsg(

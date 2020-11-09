@@ -53,7 +53,7 @@ namespace GC
 
             server.Start();
             Console.WriteLine("Insecure ChatServer server listening on port " + port);
-            GetInfoFromMaster();
+            RegisterInMaster();
         }
 
         public void ExecuteCommands()
@@ -95,30 +95,17 @@ namespace GC
             file.Close();
         }
 
-        public void GetInfoFromMaster()
+        public void RegisterInMaster()
         {
             Console.WriteLine();
             Console.WriteLine("--- Client ---");
-            Console.WriteLine("Asking master for some info on the network");
+            Console.WriteLine("Master, i'm ready for you!");
+            Console.WriteLine("Waiting for some info on the network");
 
             string local = "localhost";
             channel = GrpcChannel.ForAddress($"http://{local}:10001");
             pmc = new PMasterService.PMasterServiceClient(channel);
-            GetPartitionsReply repp = pmc.GetPartitionsInfo(new GetPartitionsRequest());
-            GetServersInfoReply reps = pmc.GetServersInfo(new GetServersInfoRequest());
-
-            foreach (PartitionInf partitionInf in repp.Info)
-            {
-                StorePartition(partitionInf.PartitionId, new List<string>(partitionInf.ServerIds.ToList()));
-            }
-
-            foreach (ServerInf serverInf in reps.Info)
-            {
-                StoreServer(serverInf.Id, serverInf.Url);
-            }
-            channel = null;
-
-            Console.WriteLine("Got that info, ready to work!");
+            pmc.Register(new RegisterRequest());
         }
 
 

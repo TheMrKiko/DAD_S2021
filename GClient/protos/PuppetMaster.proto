@@ -1,24 +1,9 @@
 ﻿syntax = "proto3";
 
 service PMasterService {
-   rpc GetServersInfo (GetServersInfoRequest) returns (GetServersInfoReply);
-   rpc GetPartitionsInfo (GetPartitionsRequest) returns (GetPartitionsReply);
+	rpc Register (RegisterRequest) returns (RegisterReply);
 }
-message GetServersInfoRequest {
+message RegisterRequest {
 }
-message GetServersInfoReply {
-    repeated ServerInf info = 1;
-}
-message GetPartitionsRequest {
-}
-message GetPartitionsReply {
-    repeated PartitionInf info = 1;
-}
-message PartitionInf {
-    string partition_id = 1;
-    repeated string server_ids = 2;
-}
-message ServerInf {
-    string id = 1;
-    string url = 2;
+message RegisterReply {
 }

@@ -35,7 +35,7 @@ namespace GS
             };
 
             server.Start();
-            service.GetInfoFromMaster();
+            service.RegisterInMaster();
 
             Console.WriteLine(startupMessage);
             //Configuring HTTP for client connections in Register method

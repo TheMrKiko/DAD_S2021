@@ -14,7 +14,7 @@ namespace GS
         private GrpcChannel channel;
         private PMasterService.PMasterServiceClient pmc;
         //private Dictionary<string, ChatClientService.ChatClientServiceClient> clientMap =
-          //  new Dictionary<string, ChatClientService.ChatClientServiceClient>();
+        //  new Dictionary<string, ChatClientService.ChatClientServiceClient>();
 
         private Dictionary<string, string> data = new Dictionary<string, string>();
         private readonly Dictionary<string, string> serverList = new Dictionary<string, string>();
@@ -24,28 +24,17 @@ namespace GS
         {
         }
 
-        public void GetInfoFromMaster()
+        public void RegisterInMaster()
         {
             Console.WriteLine();
             Console.WriteLine("--- Server ---");
-            Console.WriteLine("Asking master for some info on the network");
+            Console.WriteLine("Master, i'm ready for you!");
+            Console.WriteLine("Waiting for some info on the network");
 
             string local = "localhost";
             channel = GrpcChannel.ForAddress($"http://{local}:10001");
             pmc = new PMasterService.PMasterServiceClient(channel);
-            GetPartitionsReply repp = pmc.GetPartitionsInfo(new GetPartitionsRequest());
-            GetServersInfoReply reps = pmc.GetServersInfo(new GetServersInfoRequest());
-
-            foreach (PartitionInf partitionInf in repp.Info)
-            {
-                StorePartition(partitionInf.PartitionId, new List<string>(partitionInf.ServerIds.ToList()));
-            }
-
-            foreach (ServerInf serverInf in reps.Info)
-            {
-                StoreServer(serverInf.Id, serverInf.Url);
-            }
-            Console.WriteLine("Got that info, ready to work!");
+            pmc.Register(new RegisterRequest());
         }
 
         public override Task<ReadServerReply> ReadServer(ReadServerRequest request, ServerCallContext context)
@@ -77,7 +66,8 @@ namespace GS
 
         private WriteServerReply Write(WriteServerRequest request)
         {
-            lock(this) {
+            lock (this)
+            {
                 data[request.ObjectId] = request.NewObject.Value;
             }
             Console.WriteLine("Done.");

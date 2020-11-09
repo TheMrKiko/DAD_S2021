@@ -15,7 +15,7 @@ namespace PuppetMaster {
             InitializeComponent();
             
             puppetLogic = new PuppetMasterLogic(this, "localhost", 10001, filename);
-            Task.Run(() => puppetLogic.ExecuteCommands());
+            Task.Run(() => puppetLogic.ExecuteCommandsAsync());
         }
 
         private void btReg_Click(object sender, EventArgs e) {
