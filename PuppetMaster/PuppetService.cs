@@ -6,9 +6,17 @@ namespace PuppetMaster
 {
     public class PuppetService : PMasterService.PMasterServiceBase {
         IPuppetMasterGUI clientLogic;
+        private System.Threading.EventWaitHandle ewh = new System.Threading.EventWaitHandle(false, System.Threading.EventResetMode.ManualReset);
 
         public PuppetService(IPuppetMasterGUI clientLogic) {
             this.clientLogic = clientLogic;
+            Task.Run(async () =>  {
+                Console.WriteLine("Start count");
+                await Task.Delay(20000);
+                Console.WriteLine("End count");
+                ewh.Set();
+            }
+            );
         }
 
         public override Task<GetPartitionsReply> GetPartitionsInfo(GetPartitionsRequest request, ServerCallContext context)
@@ -24,6 +32,8 @@ namespace PuppetMaster
             Console.WriteLine();
             Console.WriteLine("--- Master ---");
             Console.WriteLine("Some node asked to " + context.Method);
+            ewh.WaitOne();
+            Console.WriteLine("bla");
             return Task.FromResult(this.clientLogic.ServersInfo(request));
         }
 
