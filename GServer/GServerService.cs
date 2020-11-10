@@ -35,7 +35,7 @@ namespace GS
 
         private ReadServerReply Read(ReadServerRequest request)
         {
-            string value = clientLogic.Read(request.ObjectId);
+            string value = clientLogic.Read(request.ObjectId, request.PartitionId);
 
             return new ReadServerReply { Object = new Object { Value = value } };
         }

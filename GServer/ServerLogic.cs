@@ -15,9 +15,9 @@ namespace GS
         private readonly int max_d;
         private readonly string masterHostname;
 
-        private readonly Dictionary<string, string> data = new Dictionary<string, string>();
         private readonly Dictionary<string, string> serverList = new Dictionary<string, string>();
         private readonly Dictionary<string, List<string>> partitionList = new Dictionary<string, List<string>>();
+        private readonly Dictionary<string, Dictionary<string, string>> data = new Dictionary<string, Dictionary<string, string>>();
 
         private GrpcChannel channel;
         private PMasterService.PMasterServiceClient pmc;
@@ -36,22 +36,30 @@ namespace GS
             RegisterInMaster();
         }
 
-        public string Read(string id)
+        public string Read(string objectId, string partitionId)
         {
             string value;
-            lock (this)
-                if (!data.TryGetValue(id, out value))
+
+            lock (data)
+                if (data[partitionId] == null)
+                    data[partitionId] = new Dictionary<string, string>();
+
+            lock (data[partitionId])
+                if (!data[partitionId].TryGetValue(objectId, out value))
                     value = "N/A";
-            Console.WriteLine("I only got " + value);
+            Console.WriteLine("For partition " + partitionId + " and id " + objectId + ", i have " + value);
             return value;
         }
 
         public void Write(string objectId, string partitionId, string newObj)
         {
-            lock (this)
-            {
-                data[objectId] = newObj;
-            }
+            lock (data)
+                if (data[partitionId] == null)
+                    data[partitionId] = new Dictionary<string, string>();
+
+            lock (data[partitionId])
+                data[partitionId].Add(objectId, newObj);
+
             Console.WriteLine("Done.");
         }
 
