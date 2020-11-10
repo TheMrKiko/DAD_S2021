@@ -28,7 +28,7 @@ namespace GC
 
             foreach (PartitionInfo partition in request.Info)
                 this.clientLogic.StorePartition(partition.PartitionId, new List<string>(partition.ServerIds.ToList()));
-
+            this.clientLogic.Registed();
             return Task.FromResult(new RegisterPartitionsReply());
         }
 
@@ -41,6 +41,7 @@ namespace GC
 
             foreach (ServerInfo server in request.Info)
                 this.clientLogic.StoreServer(server.Id, server.Url);
+            this.clientLogic.Registed();
 
             return Task.FromResult(new RegisterServersReply());
         }

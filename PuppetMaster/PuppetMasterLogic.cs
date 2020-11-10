@@ -101,16 +101,22 @@ namespace PuppetMaster
                         Client(split[1], split[2], split[3]);
                         break;
                     case "Status":
+                        Task.WaitAll(SyncConfig(ConfigSteps.Commands));
                         break;
                     case "Wait 2000":
+                        Task.WaitAll(SyncConfig(ConfigSteps.Commands));
                         break;
                     case "Freeze s1":
+                        Task.WaitAll(SyncConfig(ConfigSteps.Commands));
                         break;
                     case "Unfreeze s1":
+                        Task.WaitAll(SyncConfig(ConfigSteps.Commands));
                         break;
                     case "Crash s2":
+                        Task.WaitAll(SyncConfig(ConfigSteps.Commands));
                         break;
                     default:
+                        Task.WaitAll(SyncConfig(ConfigSteps.Commands));
                         Console.WriteLine("Default case");
                         break;
                 }
@@ -119,7 +125,7 @@ namespace PuppetMaster
             file.Close();
         }
 
-        private async void SyncConfig(ConfigSteps config)
+        private async Task SyncConfig(ConfigSteps config)
         {
             switch (config)
             {
@@ -132,6 +138,7 @@ namespace PuppetMaster
                 case ConfigSteps.Client:
                     if (configStep == ConfigSteps.Server)
                     {
+                        configStep = ConfigSteps.Client;
                         while (n_nodes != 0) { /*await Task.Delay(100);*/ }
                         Console.WriteLine("Servers alive. Informing them.");
 
@@ -169,12 +176,11 @@ namespace PuppetMaster
                             sr = await src;
                         Console.WriteLine("Servers ready.");
                     }
-
-                    configStep = ConfigSteps.Client;
                     break;
                 case ConfigSteps.Commands:
                     if (configStep == ConfigSteps.Client)
                     {
+                        configStep = ConfigSteps.Commands;
                         while (n_nodes != 0) { /*await Task.Delay(100);*/ }
                         Console.WriteLine("Clients alive. Informing them.");
 
@@ -212,8 +218,6 @@ namespace PuppetMaster
                             sr = await src;
                         Console.WriteLine("Clients ready.");
                     }
-
-                    configStep = ConfigSteps.Commands;
                     break;
                 default:
                     break;
@@ -264,7 +268,7 @@ namespace PuppetMaster
 
         public void Server(string id, string url, int min_delay, int max_delay)
         {
-            SyncConfig(ConfigSteps.Server);
+            Task.WaitAll(SyncConfig(ConfigSteps.Server));
             Uri uri = new Uri(url);
             pcschannel = GrpcChannel.ForAddress($"http://{uri.Host}:10000");
             pcs = new ProcessCreationService.ProcessCreationServiceClient(pcschannel);
@@ -290,7 +294,7 @@ namespace PuppetMaster
 
         public void Client(string username, string url, string script_file)
         {
-            SyncConfig(ConfigSteps.Client);
+            Task.WaitAll(SyncConfig(ConfigSteps.Client));
             Uri uri = new Uri(url);
             pcschannel = GrpcChannel.ForAddress($"http://{uri.Host}:10000");
             pcs = new ProcessCreationService.ProcessCreationServiceClient(pcschannel);

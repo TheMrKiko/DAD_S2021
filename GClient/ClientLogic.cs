@@ -30,6 +30,8 @@ namespace GC
         private GrpcChannel channel;
         private GSService.GSServiceClient client;
         private PMasterService.PMasterServiceClient pmc;
+        private int ready = 2;
+
         //private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
 
         public ClientLogic(ClientGUI guiWindow, string username, string url, string file)
@@ -56,6 +58,14 @@ namespace GC
             Console.WriteLine("Insecure ChatServer server listening on port " + port);
 
             RegisterInMaster();
+
+            while (ready != 0) { /*await Task.Delay(100);*/ }
+        }
+
+        public void Registed()
+        {
+            lock (this)
+                this.ready -= 1;
         }
 
         public void ExecuteCommands()
