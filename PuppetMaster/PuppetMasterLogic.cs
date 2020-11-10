@@ -17,61 +17,45 @@ namespace PuppetMaster
     public interface IPuppetMasterGUI
     {
         //bool AddMsgtoGUI(string s);
-        //GetPartitionsReply PartitionsInfo(GetPartitionsRequest request);
-        //GetServersInfoReply ServersInfo(GetServersInfoRequest request);
         void Register(string id, NodeType type);
     }
+
+    enum ConfigSteps
+    {
+        ReplicateFactor,
+        Partition,
+        Server,
+        Client,
+        Commands
+    }
+
     public class PuppetMasterLogic : IPuppetMasterGUI
     {
         private GrpcChannel channel, pcschannel;
-        //private PuppetMasterService.PuppetMasterServiceClient gclient;
-        //private PuppetMasterService.PuppetMasterServiceClient client;
-        private GServerService.GServerServiceClient gserver;
-        private GCService.GCServiceClient gclient;
-        private PNodeService.PNodeServiceClient pns;
-        private ProcessCreationService.ProcessCreationServiceClient pcs;
+        private GServerService.GServerServiceClient gserver; private GCService.GCServiceClient gclient;
+        private PNodeService.PNodeServiceClient pns; private ProcessCreationService.ProcessCreationServiceClient pcs;
         private Server server;
         private readonly PuppetMasterGUI guiWindow;
-        private string nick;
         private readonly string hostname;
         private readonly string filename;
         private ConfigSteps configStep;
-        private readonly Dictionary<string, List<string>> partitions = new Dictionary<string, List<string>>();
-        enum ConfigSteps
-        {
-            ReplicateFactor,
-            Partition,
-            Server,
-            Client,
-            Commands
-        }
-
+        RegisterPartitionsRequest partitionsRequest; RegisterServersRequest serversRequest;
         //private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
+
+        private int n_nodes = 0;
+        private readonly Dictionary<string, List<string>> partitions = new Dictionary<string, List<string>>();
         private readonly Dictionary<string, (string url, GServerService.GServerServiceClient sc, PNodeService.PNodeServiceClient pnc)> serverMap =
             new Dictionary<string, (string, GServerService.GServerServiceClient, PNodeService.PNodeServiceClient)>();
         private readonly Dictionary<string, (string url, GCService.GCServiceClient sc, PNodeService.PNodeServiceClient pnc)> clientMap =
             new Dictionary<string, (string, GCService.GCServiceClient, PNodeService.PNodeServiceClient)>();
-        private int n_nodes = 0;
 
-        public PuppetMasterLogic(PuppetMasterGUI guiWindow, string serverHostname, int serverPort, string filename)
+        public PuppetMasterLogic(PuppetMasterGUI guiWindow, string masterHostname, int masterPort, string filename)
         {
-            this.hostname = serverHostname;
+            this.hostname = masterHostname;
             this.guiWindow = guiWindow;
             this.filename = filename;
 
-            StartPMServer(serverHostname, serverPort);
-        }
-
-        private void StartPMServer(string serverHostname, int serverPort)
-        {
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            server = new Server
-            {
-                Services = { PMasterService.BindService(new PuppetService(this)) },
-                Ports = { new ServerPort(serverHostname, serverPort, ServerCredentials.Insecure) }
-            };
-            server.Start();
-            Console.WriteLine("Insecure ChatServer server listening on port " + serverPort);
+            StartPMServer(masterHostname, masterPort);
         }
 
         public void ExecuteCommands()
@@ -125,105 +109,6 @@ namespace PuppetMaster
             file.Close();
         }
 
-        private async Task SyncConfig(ConfigSteps config)
-        {
-            switch (config)
-            {
-                case ConfigSteps.ReplicateFactor:
-                    break;
-                case ConfigSteps.Partition:
-                    break;
-                case ConfigSteps.Server:
-                    break;
-                case ConfigSteps.Client:
-                    if (configStep == ConfigSteps.Server)
-                    {
-                        configStep = ConfigSteps.Client;
-                        while (n_nodes != 0) { /*await Task.Delay(100);*/ }
-                        Console.WriteLine("Servers alive. Informing them.");
-
-                        RegisterPartitionsRequest partitionsRequest = new RegisterPartitionsRequest();
-                        RegisterServersRequest serversRequest = new RegisterServersRequest();
-                        PartitionInfo pinfo;
-                        RegisterPartitionsReply pr; RegisterServersReply sr;
-                        HashSet<AsyncUnaryCall<RegisterPartitionsReply>> partitionsReplies = new HashSet<AsyncUnaryCall<RegisterPartitionsReply>>();
-                        HashSet<AsyncUnaryCall<RegisterServersReply>> serversReplies = new HashSet<AsyncUnaryCall<RegisterServersReply>>();
-
-                        lock (this)
-                        {
-
-                            foreach (string p in partitions.Keys)
-                            {
-                                pinfo = new PartitionInfo { PartitionId = p };
-                                pinfo.ServerIds.Add(partitions[p]);
-                                partitionsRequest.Info.Add(pinfo);
-                            }
-
-                            foreach (string s_id in serverMap.Keys)
-                                serversRequest.Info.Add(new ServerInfo { Id = s_id, Url = serverMap[s_id].url });
-
-                            foreach (string s_id in serverMap.Keys)
-                            {
-                                partitionsReplies.Add(serverMap[s_id].pnc.RegisterPartitionsAsync(partitionsRequest));
-                                serversReplies.Add(serverMap[s_id].pnc.RegisterServersAsync(serversRequest));
-                            }
-                        }
-                        Console.WriteLine("Informed. Waiting acks.");
-
-                        foreach (AsyncUnaryCall<RegisterPartitionsReply> prc in partitionsReplies)
-                            pr = await prc;
-                        foreach (AsyncUnaryCall<RegisterServersReply> src in serversReplies)
-                            sr = await src;
-                        Console.WriteLine("Servers ready.");
-                    }
-                    break;
-                case ConfigSteps.Commands:
-                    if (configStep == ConfigSteps.Client)
-                    {
-                        configStep = ConfigSteps.Commands;
-                        while (n_nodes != 0) { /*await Task.Delay(100);*/ }
-                        Console.WriteLine("Clients alive. Informing them.");
-
-                        RegisterPartitionsRequest partitionsRequest = new RegisterPartitionsRequest();
-                        RegisterServersRequest serversRequest = new RegisterServersRequest();
-                        PartitionInfo pinfo;
-                        RegisterPartitionsReply pr; RegisterServersReply sr;
-                        HashSet<AsyncUnaryCall<RegisterPartitionsReply>> partitionsReplies = new HashSet<AsyncUnaryCall<RegisterPartitionsReply>>();
-                        HashSet<AsyncUnaryCall<RegisterServersReply>> serversReplies = new HashSet<AsyncUnaryCall<RegisterServersReply>>();
-
-                        lock (this)
-                        {
-
-                            foreach (string p in partitions.Keys)
-                            {
-                                pinfo = new PartitionInfo { PartitionId = p };
-                                pinfo.ServerIds.Add(partitions[p]);
-                                partitionsRequest.Info.Add(pinfo);
-                            }
-
-                            foreach (string s_id in serverMap.Keys)
-                                serversRequest.Info.Add(new ServerInfo { Id = s_id, Url = serverMap[s_id].url });
-
-                            foreach (string c_id in clientMap.Keys)
-                            {
-                                partitionsReplies.Add(clientMap[c_id].pnc.RegisterPartitionsAsync(partitionsRequest));
-                                serversReplies.Add(clientMap[c_id].pnc.RegisterServersAsync(serversRequest));
-                            }
-                        }
-                        Console.WriteLine("Informed. Waiting acks.");
-
-                        foreach (AsyncUnaryCall<RegisterPartitionsReply> prc in partitionsReplies)
-                            pr = await prc;
-                        foreach (AsyncUnaryCall<RegisterServersReply> src in serversReplies)
-                            sr = await src;
-                        Console.WriteLine("Clients ready.");
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-
         public void ReplicationFactor(int r)
         {
             return;
@@ -234,37 +119,6 @@ namespace PuppetMaster
             lock (this)
                 partitions[id] = serverids;
         }
-        /*public GetPartitionsReply PartitionsInfo(GetPartitionsRequest request)
-        {
-            GetPartitionsReply req = new GetPartitionsReply();
-            PartitionInf pinfo;
-            foreach (string p in partitions.Keys)
-            {
-                pinfo = new PartitionInf { PartitionId = p };
-                pinfo.ServerIds.Add(partitions[p]);
-                req.Info.Add(pinfo);
-            }
-            return req;
-        }*/
-
-        public void Register(string id, NodeType type)
-        {
-            lock (this)
-                n_nodes -= 1;
-        }
-
-        /*public GetServersInfoReply ServersInfo(GetServersInfoRequest request)
-        {
-            GetServersInfoReply reqs = new GetServersInfoReply();
-
-            foreach (string s1 in serverMap.Keys)
-            {
-                reqs.Info.Add(new ServerInf { Id = s1, Url = serverMap[s1].Item1 });
-            }
-            
-            return reqs;
-
-        }*/
 
         public void Server(string id, string url, int min_delay, int max_delay)
         {
@@ -312,9 +166,116 @@ namespace PuppetMaster
                     clientMap[username] = (url, gclient, pns);
                     n_nodes += 1;
                 }
-
             }
         }
+
+        private void StartPMServer(string serverHostname, int serverPort)
+        {
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            server = new Server
+            {
+                Services = { PMasterService.BindService(new PuppetService(this)) },
+                Ports = { new ServerPort(serverHostname, serverPort, ServerCredentials.Insecure) }
+            };
+            server.Start();
+            Console.WriteLine("Insecure ChatServer server listening on port " + serverPort);
+        }
+
+        public void Register(string id, NodeType type)
+        {
+            lock (this)
+                n_nodes -= 1;
+        }
+
+        public void ServerShutdown()
+        {
+            server.ShutdownAsync().Wait();
+        }
+
+        private async Task SyncConfig(ConfigSteps config)
+        {
+            switch (config)
+            {
+                case ConfigSteps.ReplicateFactor:
+                    break;
+                case ConfigSteps.Partition:
+                    break;
+                case ConfigSteps.Server:
+                    break;
+                case ConfigSteps.Client:
+                    if (configStep == ConfigSteps.Server)
+                    {
+                        configStep = ConfigSteps.Client;
+                        while (n_nodes != 0) { /*await Task.Delay(100);*/ }
+                        Console.WriteLine("Servers alive. Informing them.");
+
+                        PartitionInfo pinfo;
+                        RegisterPartitionsReply pr; RegisterServersReply sr;
+                        partitionsRequest = new RegisterPartitionsRequest(); serversRequest = new RegisterServersRequest();
+                        HashSet<AsyncUnaryCall<RegisterPartitionsReply>> partitionsReplies = new HashSet<AsyncUnaryCall<RegisterPartitionsReply>>();
+                        HashSet<AsyncUnaryCall<RegisterServersReply>> serversReplies = new HashSet<AsyncUnaryCall<RegisterServersReply>>();
+
+                        lock (this)
+                        {
+
+                            foreach (string p in partitions.Keys)
+                            {
+                                pinfo = new PartitionInfo { PartitionId = p };
+                                pinfo.ServerIds.Add(partitions[p]);
+                                partitionsRequest.Info.Add(pinfo);
+                            }
+
+                            foreach (string s_id in serverMap.Keys)
+                                serversRequest.Info.Add(new ServerInfo { Id = s_id, Url = serverMap[s_id].url });
+
+                            foreach (string s_id in serverMap.Keys)
+                            {
+                                partitionsReplies.Add(serverMap[s_id].pnc.RegisterPartitionsAsync(partitionsRequest));
+                                serversReplies.Add(serverMap[s_id].pnc.RegisterServersAsync(serversRequest));
+                            }
+                        }
+                        Console.WriteLine("Informed. Waiting acks.");
+
+                        foreach (AsyncUnaryCall<RegisterPartitionsReply> prc in partitionsReplies)
+                            pr = await prc;
+                        foreach (AsyncUnaryCall<RegisterServersReply> src in serversReplies)
+                            sr = await src;
+                        Console.WriteLine("Servers ready.");
+                    }
+                    break;
+                case ConfigSteps.Commands:
+                    if (configStep == ConfigSteps.Client)
+                    {
+                        configStep = ConfigSteps.Commands;
+                        while (n_nodes != 0) { /*await Task.Delay(100);*/ }
+                        Console.WriteLine("Clients alive. Informing them.");
+
+                        RegisterPartitionsReply pr; RegisterServersReply sr;
+                        HashSet<AsyncUnaryCall<RegisterPartitionsReply>> partitionsReplies = new HashSet<AsyncUnaryCall<RegisterPartitionsReply>>();
+                        HashSet<AsyncUnaryCall<RegisterServersReply>> serversReplies = new HashSet<AsyncUnaryCall<RegisterServersReply>>();
+
+                        lock (this)
+                        {
+                            foreach (string c_id in clientMap.Keys)
+                            {
+                                partitionsReplies.Add(clientMap[c_id].pnc.RegisterPartitionsAsync(partitionsRequest));
+                                serversReplies.Add(clientMap[c_id].pnc.RegisterServersAsync(serversRequest));
+                            }
+                        }
+                        Console.WriteLine("Informed. Waiting acks.");
+
+                        foreach (AsyncUnaryCall<RegisterPartitionsReply> prc in partitionsReplies)
+                            pr = await prc;
+                        foreach (AsyncUnaryCall<RegisterServersReply> src in serversReplies)
+                            sr = await src;
+                        Console.WriteLine("Clients ready.");
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
 
         /*public bool AddMsgtoGUI(string s)
         {
@@ -359,10 +320,5 @@ namespace PuppetMaster
                 Msg = m
             });
         }*/
-
-        public void ServerShutdown()
-        {
-            server.ShutdownAsync().Wait();
-        }
     }
 }

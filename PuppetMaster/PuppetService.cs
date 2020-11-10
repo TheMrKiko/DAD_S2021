@@ -11,6 +11,15 @@ namespace PuppetMaster
             this.clientLogic = clientLogic;
         }
 
+        public override Task<RegisterReply> Register(RegisterRequest request, ServerCallContext context)
+        {
+            Console.WriteLine();
+            Console.WriteLine("--- Master ---");
+            Console.WriteLine("Some node just registed.");
+            this.clientLogic.Register(request.Id, request.Type);
+            return Task.FromResult(new RegisterReply());
+        }
+
         /*public override Task<GetPartitionsReply> GetPartitionsInfo(GetPartitionsRequest request, ServerCallContext context)
         {
             Console.WriteLine();
@@ -26,15 +35,6 @@ namespace PuppetMaster
             Console.WriteLine("Some node asked to " + context.Method);
             return Task.FromResult(this.clientLogic.ServersInfo(request));
         }*/
-
-        public override Task<RegisterReply> Register(RegisterRequest request, ServerCallContext context)
-        {
-            Console.WriteLine();
-            Console.WriteLine("--- Master ---");
-            Console.WriteLine("Some node just registed.");
-            this.clientLogic.Register(request.Id, request.Type);
-            return Task.FromResult(new RegisterReply());
-        }
 
         /*public override Task<RecvMsgReply> RecvMsg(
             RecvMsgRequest request, ServerCallContext context) {

@@ -11,10 +11,10 @@ using System.Windows.Forms;
 namespace PuppetMaster {
     public partial class PuppetMasterGUI : Form {
         PuppetMasterLogic puppetLogic;
-        public PuppetMasterGUI(string filename) {
+        public PuppetMasterGUI(string filename, string host) {
             InitializeComponent();
             
-            puppetLogic = new PuppetMasterLogic(this, "localhost", 10001, filename);
+            puppetLogic = new PuppetMasterLogic(this, host, 10001, filename);
             Task.Run(() => puppetLogic.ExecuteCommands());
         }
 

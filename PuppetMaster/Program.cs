@@ -13,10 +13,11 @@ namespace PuppetMaster {
         static void Main(string[] args)
         {
             string file = args[0];
+            string host = "localhost";
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new PuppetMasterGUI(file));
+            Application.Run(new PuppetMasterGUI(file, host));
 
             while(true);
         }
