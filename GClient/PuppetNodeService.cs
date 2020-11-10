@@ -1,5 +1,4 @@
 ﻿using Grpc.Core;
-using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace GC
 {
-    // ChatServerService is the namespace defined in the protobuf
-    // ChatServerServiceBase is the generated base implementation of the service
+    // PNodeService is the namespace defined in the protobuf
+    // PNodeServiceBase is the generated base implementation of the service
     public class PuppetNodeService : PNodeService.PNodeServiceBase
     {
-        private GrpcChannel channel;
         private readonly ClientLogic clientLogic;
 
         public PuppetNodeService(ClientLogic clientLogic)

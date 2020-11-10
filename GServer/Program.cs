@@ -20,20 +20,7 @@ namespace GS
 
             int port = new Uri(url).Port;
 
-            GServerService service = new GServerService();
-
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            Server server = new Server
-            {
-                Services = { GSService.BindService(service), PNodeService.BindService(new PuppetNodeService(service)) },
-                Ports = { new ServerPort(hostname, port, ServerCredentials.Insecure) }
-            };
-
-            server.Start();
-            service.RegisterInMaster(id);
-
-            Console.WriteLine("Insecure ChatServer server listening on port " + port);
-            //Configuring HTTP for client connections in Register method
+            new ServerLogic(id, hostname, port, min_d, max_d);
 
             while (true) ;
         }

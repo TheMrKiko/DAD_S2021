@@ -1,5 +1,4 @@
 ﻿using Grpc.Core;
-using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,28 +6,29 @@ using System.Threading.Tasks;
 
 namespace GS
 {
-    // ChatServerService is the namespace defined in the protobuf
-    // ChatServerServiceBase is the generated base implementation of the service
+    // PNodeService is the namespace defined in the protobuf
+    // PNodeServiceBase is the generated base implementation of the service
     public class PuppetNodeService : PNodeService.PNodeServiceBase
     {
-        private GrpcChannel channel;
-        private readonly GServerService serverService;
+        private readonly ServerLogic serverLogic;
 
-        public PuppetNodeService(GServerService serverService)
+        public PuppetNodeService(ServerLogic serverLogic)
         {
-            this.serverService = serverService;
+            this.serverLogic = serverLogic;
         }
 
         public override Task<RegisterPartitionsReply> RegisterPartitions(RegisterPartitionsRequest request, ServerCallContext context)
         {
             Console.WriteLine();
             Console.WriteLine("--- Server ---");
-            Console.WriteLine("Master says to "+ context.Method);
-            Console.WriteLine("-- As in: "+ request);
+            Console.WriteLine("Master says to " + context.Method);
+            Console.WriteLine("-- As in: " + request);
 
+            Dictionary<string, List<string>> parts = new Dictionary<string, List<string>>();
             foreach (PartitionInfo partition in request.Info)
-                this.serverService.StorePartition(partition.PartitionId, new List<string>(partition.ServerIds.ToList()));
+                parts.Add(partition.PartitionId, new List<string>(partition.ServerIds.ToList()));
 
+            this.serverLogic.StorePartitions(parts);
             return Task.FromResult(new RegisterPartitionsReply());
         }
 
@@ -39,9 +39,11 @@ namespace GS
             Console.WriteLine("Master says to " + context.Method);
             Console.WriteLine("-- As in: " + request);
 
+            Dictionary<string, string> servers = new Dictionary<string, string>();
             foreach (ServerInfo server in request.Info)
-                this.serverService.StoreServer(server.Id, server.Url);
+                servers.Add(server.Id, server.Url);
 
+            this.serverLogic.StoreServers(servers);
             return Task.FromResult(new RegisterServersReply());
         }
 
