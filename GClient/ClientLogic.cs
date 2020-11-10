@@ -52,7 +52,9 @@ namespace GC
             };
 
             server.Start();
+
             Console.WriteLine("Insecure ChatServer server listening on port " + port);
+
             RegisterInMaster();
         }
 
@@ -105,7 +107,7 @@ namespace GC
             string local = "localhost";
             channel = GrpcChannel.ForAddress($"http://{local}:10001");
             pmc = new PMasterService.PMasterServiceClient(channel);
-            pmc.Register(new RegisterRequest());
+            pmc.Register(new RegisterRequest { Id = username, Type = NodeType.Client });
         }
 
 

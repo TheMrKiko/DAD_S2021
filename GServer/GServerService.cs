@@ -24,7 +24,7 @@ namespace GS
         {
         }
 
-        public void RegisterInMaster()
+        public void RegisterInMaster(string id)
         {
             Console.WriteLine();
             Console.WriteLine("--- Server ---");
@@ -34,7 +34,7 @@ namespace GS
             string local = "localhost";
             channel = GrpcChannel.ForAddress($"http://{local}:10001");
             pmc = new PMasterService.PMasterServiceClient(channel);
-            pmc.Register(new RegisterRequest());
+            pmc.Register(new RegisterRequest { Id = id, Type = NodeType.Server });
         }
 
         public override Task<ReadServerReply> ReadServer(ReadServerRequest request, ServerCallContext context)

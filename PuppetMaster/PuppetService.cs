@@ -32,7 +32,7 @@ namespace PuppetMaster
             Console.WriteLine();
             Console.WriteLine("--- Master ---");
             Console.WriteLine("Some node just registed.");
-            this.clientLogic.Register();
+            this.clientLogic.Register(request.Id, request.Type);
             return Task.FromResult(new RegisterReply());
         }
 
