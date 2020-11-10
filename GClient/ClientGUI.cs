@@ -10,11 +10,12 @@ using System.Windows.Forms;
 
 namespace GC {
     public partial class ClientGUI : Form {
-        ClientLogic clientLogic;
+        readonly ClientLogic clientLogic;
         public ClientGUI(string username, string url, string file) {
             InitializeComponent();
-            clientLogic = new ClientLogic(this, username, url, file);
-            Task.Run(() => clientLogic.ExecuteCommands());
+
+            clientLogic = new ClientLogic(this, username, url);
+            Task.Run(() => clientLogic.ExecuteCommands(file));
         }
 
         public void AddMsgtoGUI(string m) { logs.Text += m + "\r\n"; }

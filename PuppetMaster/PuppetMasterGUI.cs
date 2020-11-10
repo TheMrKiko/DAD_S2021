@@ -10,12 +10,12 @@ using System.Windows.Forms;
 
 namespace PuppetMaster {
     public partial class PuppetMasterGUI : Form {
-        PuppetMasterLogic puppetLogic;
+        readonly PuppetMasterLogic puppetLogic;
         public PuppetMasterGUI(string filename, string host) {
             InitializeComponent();
             
-            puppetLogic = new PuppetMasterLogic(this, host, 10001, filename);
-            Task.Run(() => puppetLogic.ExecuteCommands());
+            puppetLogic = new PuppetMasterLogic(this, host, 10001);
+            Task.Run(() => puppetLogic.ExecuteCommands(filename));
         }
 
         private void btReg_Click(object sender, EventArgs e) {

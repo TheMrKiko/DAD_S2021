@@ -26,9 +26,11 @@ namespace GC
             Console.WriteLine("Master says to " + context.Method);
             Console.WriteLine("-- As in: " + request);
 
+            Dictionary<string, List<string>> parts = new Dictionary<string, List<string>>();
             foreach (PartitionInfo partition in request.Info)
-                this.clientLogic.StorePartition(partition.PartitionId, new List<string>(partition.ServerIds.ToList()));
-            this.clientLogic.Registed();
+                parts.Add(partition.PartitionId, new List<string>(partition.ServerIds.ToList()));
+
+            this.clientLogic.StorePartitions(parts);
             return Task.FromResult(new RegisterPartitionsReply());
         }
 
@@ -39,10 +41,11 @@ namespace GC
             Console.WriteLine("Master says to " + context.Method);
             Console.WriteLine("-- As in: " + request);
 
+            Dictionary<string, string> servers = new Dictionary<string, string>();
             foreach (ServerInfo server in request.Info)
-                this.clientLogic.StoreServer(server.Id, server.Url);
-            this.clientLogic.Registed();
+                servers.Add(server.Id, server.Url);
 
+            this.clientLogic.StoreServers(servers);
             return Task.FromResult(new RegisterServersReply());
         }
 

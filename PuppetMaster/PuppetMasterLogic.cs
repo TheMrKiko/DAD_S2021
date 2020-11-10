@@ -31,14 +31,14 @@ namespace PuppetMaster
 
     public class PuppetMasterLogic : IPuppetMasterGUI
     {
+        private readonly PuppetMasterGUI guiWindow;
+        private readonly string masterHostname;
+
+        private ConfigSteps configStep;
+        private Server server;
         private GrpcChannel channel, pcschannel;
         private GServerService.GServerServiceClient gserver; private GCService.GCServiceClient gclient;
         private PNodeService.PNodeServiceClient pns; private ProcessCreationService.ProcessCreationServiceClient pcs;
-        private Server server;
-        private readonly PuppetMasterGUI guiWindow;
-        private readonly string hostname;
-        private readonly string filename;
-        private ConfigSteps configStep;
         RegisterPartitionsRequest partitionsRequest; RegisterServersRequest serversRequest;
         //private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
 
@@ -49,20 +49,19 @@ namespace PuppetMaster
         private readonly Dictionary<string, (string url, GCService.GCServiceClient sc, PNodeService.PNodeServiceClient pnc)> clientMap =
             new Dictionary<string, (string, GCService.GCServiceClient, PNodeService.PNodeServiceClient)>();
 
-        public PuppetMasterLogic(PuppetMasterGUI guiWindow, string masterHostname, int masterPort, string filename)
+        public PuppetMasterLogic(PuppetMasterGUI guiWindow, string masterHostname, int masterPort)
         {
-            this.hostname = masterHostname;
-            this.guiWindow = guiWindow;
-            this.filename = filename;
+            this.masterHostname = masterHostname;
+            this.guiWindow = guiWindow;           
 
             StartPMServer(masterHostname, masterPort);
         }
 
-        public void ExecuteCommands()
+        public void ExecuteCommands(string filename)
         {
             // Read the file and display it line by line.  
             string line; string[] split;
-            System.IO.StreamReader file = new System.IO.StreamReader($@"./{this.filename}.txt");
+            System.IO.StreamReader file = new System.IO.StreamReader($@"./{filename}.txt");
             while ((line = file.ReadLine()) != null)
             {
                 System.Console.WriteLine(line);

@@ -22,57 +22,40 @@ namespace GC
         private readonly ClientGUI guiWindow;
         private readonly string username;
         private readonly string hostname;
-        private readonly string file;
-        private readonly int port;
-        private readonly Server server;
-        private readonly Dictionary<string, string> serverList = new Dictionary<string, string>();
-        private readonly Dictionary<string, List<string>> partitionList = new Dictionary<string, List<string>>();
+        private readonly int port;     
+
+        private Server server;
         private GrpcChannel channel;
         private GSService.GSServiceClient client;
         private PMasterService.PMasterServiceClient pmc;
+
+        private readonly Dictionary<string, string> serverList = new Dictionary<string, string>();
+        private readonly Dictionary<string, List<string>> partitionList = new Dictionary<string, List<string>>();
         private int ready = 2;
 
         //private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
 
-        public ClientLogic(ClientGUI guiWindow, string username, string url, string file)
+        public ClientLogic(ClientGUI guiWindow, string username, string url)
         {
+            this.guiWindow = guiWindow;
+            this.username = username;
 
             Uri uri = new Uri(url);
-            this.guiWindow = guiWindow;
             this.hostname = uri.Host;
             this.port = uri.Port;
-            this.username = username;
-            this.file = file;
 
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-
-            // setup the client service
-            server = new Server
-            {
-                Services = { GCService.BindService(new GClientService(this)), PNodeService.BindService(new PuppetNodeService(this)) },
-                Ports = { new ServerPort(hostname, port, ServerCredentials.Insecure) }
-            };
-
-            server.Start();
-
-            Console.WriteLine("Insecure ChatServer server listening on port " + port);
+            StartClientServer();
 
             RegisterInMaster();
 
             while (ready != 0) { /*await Task.Delay(100);*/ }
         }
 
-        public void Registed()
-        {
-            lock (this)
-                this.ready -= 1;
-        }
-
-        public void ExecuteCommands()
+        public void ExecuteCommands(string filename)
         {
             // Read the file and display it line by line.  
             string line; string[] split;
-            System.IO.StreamReader file = new System.IO.StreamReader(@$"../../../../GClient/bin/debug/netcoreapp3.1/{this.file}.txt");
+            System.IO.StreamReader file = new System.IO.StreamReader(@$"../../../../GClient/bin/debug/netcoreapp3.1/{filename}.txt");
             while ((line = file.ReadLine()) != null)
             {
                 System.Console.WriteLine(line);
@@ -107,20 +90,6 @@ namespace GC
             file.Close();
         }
 
-        public void RegisterInMaster()
-        {
-            Console.WriteLine();
-            Console.WriteLine("--- Client ---");
-            Console.WriteLine("Master, i'm ready for you!");
-            Console.WriteLine("Waiting for some info on the network");
-
-            string local = "localhost";
-            channel = GrpcChannel.ForAddress($"http://{local}:10001");
-            pmc = new PMasterService.PMasterServiceClient(channel);
-            pmc.Register(new RegisterRequest { Id = username, Type = NodeType.Client });
-        }
-
-
         public void ReadObject(string part_id, string obj_id, string server_id)
         {
             string reply;
@@ -152,6 +121,41 @@ namespace GC
             AddMsgtoGUI($"Write: {reply}");
         }
 
+        private void StartClientServer()
+
+        {
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
+            // setup the client service
+            server = new Server
+            {
+                Services = { GCService.BindService(new GClientService(this)), PNodeService.BindService(new PuppetNodeService(this)) },
+                Ports = { new ServerPort(hostname, port, ServerCredentials.Insecure) }
+            };
+
+            server.Start();
+
+            Console.WriteLine("Insecure ChatServer server listening on port " + port);
+        }
+
+        public void RegisterInMaster()
+        {
+            Console.WriteLine();
+            Console.WriteLine("--- Client ---");
+            Console.WriteLine("Master, i'm ready for you!");
+            Console.WriteLine("Waiting for some info on the network");
+
+            string local = "localhost";
+            channel = GrpcChannel.ForAddress($"http://{local}:10001");
+            pmc = new PMasterService.PMasterServiceClient(channel);
+            pmc.Register(new RegisterRequest { Id = username, Type = NodeType.Client });
+        }
+
+        public void Registed()
+        {
+            lock (this)
+                this.ready -= 1;
+        }
 
         public void ConnectToServer(string id)
         {
@@ -167,22 +171,31 @@ namespace GC
             client = new GSService.GSServiceClient(channel);
         }
 
-        public void StoreServer(string id, string url)
+        public void StorePartitions(Dictionary<string, List<string>> parts)
         {
             lock (this)
-                this.serverList[id] = url;
+                foreach (string p_id in parts.Keys)
+                    this.partitionList[p_id] = parts[p_id];
+            Registed();
         }
 
-        public void StorePartition(string partitionId, List<string> serverIds)
+        public void StoreServers(Dictionary<string, string> servers)
         {
             lock (this)
-                this.partitionList[partitionId] = serverIds;
+                foreach (string s_id in servers.Keys)
+                    this.serverList[s_id] = servers[s_id];
+            Registed();
         }
 
         public bool AddMsgtoGUI(string s)
         {
             this.guiWindow.BeginInvoke(new DelAddMsg(guiWindow.AddMsgtoGUI), new object[] { s });
             return true;
+        }
+
+        public void ServerShutdown()
+        {
+            server.ShutdownAsync().Wait();
         }
 
         /*public List<string> Register(string username, string port) {
@@ -217,10 +230,5 @@ namespace GC
                 Msg = m
             });
         }*/
-
-        public void ServerShutdown()
-        {
-            server.ShutdownAsync().Wait();
-        }
     }
 }
