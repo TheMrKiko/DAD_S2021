@@ -13,10 +13,6 @@ namespace PCS
         {
         }
 
-        /*private GrpcChannel channel;
-private Dictionary<string, ChatClientService.ChatClientServiceClient> clientMap =
-   new Dictionary<string, ChatClientService.ChatClientServiceClient>();*/
-
         public override Task<CreateClientReply> CreateClient(CreateClientRequest request, ServerCallContext context)
         {
             Console.WriteLine();
@@ -58,30 +54,6 @@ private Dictionary<string, ChatClientService.ChatClientServiceClient> clientMap 
             Console.WriteLine("Process started.");
             return new CreateServerReply { Ok = r };
         }
-
-        /*public ChatClientRegisterReply Reg(ChatClientRegisterRequest request)
-        {
-            channel = GrpcChannel.ForAddress(request.Url);
-            ChatClientService.ChatClientServiceClient client =
-                new ChatClientService.ChatClientServiceClient(channel);
-            lock (this)
-            {
-                clientMap.Add(request.Nick, client);
-            }
-            Console.WriteLine($"Registered client {request.Nick} with URL {request.Url}");
-            ChatClientRegisterReply reply = new ChatClientRegisterReply();
-            lock (this)
-            {
-                foreach (string nick in clientMap.Keys)
-                {
-                    reply.Users.Add(new User { Nick = nick });
-                }
-            }
-            return reply;
-        }*/
-
-
-
     }
 }
 

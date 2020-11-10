@@ -16,24 +16,20 @@ namespace PCS
         {
             const int port = 10000;
             const string hostname = "localhost";
-            string startupMessage;
-            ServerPort serverPort;
-
-            serverPort = new ServerPort(hostname, port, ServerCredentials.Insecure);
-            startupMessage = "Insecure ChatServer server listening on port " + port;
 
             Server server = new Server
             {
                 Services = { ProcessCreationService.BindService(new PCSService()) },
-                Ports = { serverPort }
+                Ports = { new ServerPort(hostname, port, ServerCredentials.Insecure) }
             };
 
             server.Start();
 
-            Console.WriteLine(startupMessage);
+            Console.WriteLine("Insecure ChatServer server listening on port " + port);
+            
             //Configuring HTTP for client connections in Register method
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            while (true);
+            while (true) ;
         }
     }
 }

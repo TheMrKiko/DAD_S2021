@@ -170,14 +170,16 @@ namespace PuppetMaster
 
         private void StartPMServer(string serverHostname, int serverPort)
         {
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             server = new Server
             {
                 Services = { PMasterService.BindService(new PuppetService(this)) },
                 Ports = { new ServerPort(serverHostname, serverPort, ServerCredentials.Insecure) }
             };
             server.Start();
+
             Console.WriteLine("Insecure ChatServer server listening on port " + serverPort);
+
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
         }
 
         public void Register(string id, NodeType type)

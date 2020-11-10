@@ -121,11 +121,9 @@ namespace GC
             AddMsgtoGUI($"Write: {reply}");
         }
 
-        private void StartClientServer()
+        public void StartClientServer()
 
         {
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-
             // setup the client service
             server = new Server
             {
@@ -136,6 +134,8 @@ namespace GC
             server.Start();
 
             Console.WriteLine("Insecure ChatServer server listening on port " + port);
+
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
         }
 
         public void RegisterInMaster()
