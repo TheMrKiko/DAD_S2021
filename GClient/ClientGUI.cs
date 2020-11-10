@@ -1,20 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace GC {
+namespace GC
+{
     public partial class ClientGUI : Form {
         readonly ClientLogic clientLogic;
-        public ClientGUI(string username, string url, string file) {
+        public ClientGUI(string username, string url, string file, string masterHostname) {
             InitializeComponent();
 
-            clientLogic = new ClientLogic(this, username, url);
+            clientLogic = new ClientLogic(this, username, url, masterHostname);
             Task.Run(() => clientLogic.ExecuteCommands(file));
         }
 

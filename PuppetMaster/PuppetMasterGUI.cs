@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace PuppetMaster {
+namespace PuppetMaster
+{
     public partial class PuppetMasterGUI : Form {
         readonly PuppetMasterLogic puppetLogic;
         public PuppetMasterGUI(string filename, string host) {

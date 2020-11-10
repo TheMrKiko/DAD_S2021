@@ -1,7 +1,4 @@
-﻿using Grpc.Core;
-using System.Threading.Tasks;
-
-namespace GC
+﻿namespace GC
 {
     public class GClientService : GCService.GCServiceBase {
         private readonly IClientGUI clientLogic;

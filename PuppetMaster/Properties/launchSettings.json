@@ -1,8 +1,8 @@
 {
   "profiles": {
-    "GClient": {
-        "commandName": "Project",
-        "commandLineArgs": "sample_pm_script"
+    "PuppetMaster": {
+      "commandName": "Project",
+      "commandLineArgs": "localhost sample_pm_script.txt"
     }
   }
 }

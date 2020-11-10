@@ -1,13 +1,7 @@
-﻿using Google.Protobuf.Collections;
-using Grpc.Core;
+﻿using Grpc.Core;
 using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 public delegate void DelAddMsg(string s);
 
@@ -19,10 +13,12 @@ namespace GC
     }
     public class ClientLogic : IClientGUI
     {
+        private const string masterPort = "10001";
         private readonly ClientGUI guiWindow;
         private readonly string username;
         private readonly string hostname;
         private readonly int port;     
+        private readonly string masterHostname;
 
         private Server server;
         private GrpcChannel channel;
@@ -35,10 +31,11 @@ namespace GC
 
         //private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
 
-        public ClientLogic(ClientGUI guiWindow, string username, string url)
+        public ClientLogic(ClientGUI guiWindow, string username, string url, string masterHostname)
         {
             this.guiWindow = guiWindow;
             this.username = username;
+            this.masterHostname = masterHostname;
 
             Uri uri = new Uri(url);
             this.hostname = uri.Host;
@@ -55,10 +52,9 @@ namespace GC
         {
             // Read the file and display it line by line.  
             string line; string[] split;
-            System.IO.StreamReader file = new System.IO.StreamReader(@$"../../../../GClient/bin/debug/netcoreapp3.1/{filename}.txt");
+            System.IO.StreamReader file = new System.IO.StreamReader(@$"../../../../GClient/bin/debug/netcoreapp3.1/{filename}");
             while ((line = file.ReadLine()) != null)
             {
-                System.Console.WriteLine(line);
                 split = line.Split();
                 switch (split[0])
                 {
@@ -85,6 +81,7 @@ namespace GC
                         Console.WriteLine("Default case");
                         break;
                 }
+                Console.WriteLine(line);
             }
 
             file.Close();
@@ -145,8 +142,7 @@ namespace GC
             Console.WriteLine("Master, i'm ready for you!");
             Console.WriteLine("Waiting for some info on the network");
 
-            string local = "localhost";
-            channel = GrpcChannel.ForAddress($"http://{local}:10001");
+            channel = GrpcChannel.ForAddress($"http://{masterHostname}:{masterPort}");
             pmc = new PMasterService.PMasterServiceClient(channel);
             pmc.Register(new RegisterRequest { Id = username, Type = NodeType.Client });
         }
@@ -166,7 +162,7 @@ namespace GC
             // setup the client side
             if (channel != null)
                 channel.Dispose();
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
             channel = GrpcChannel.ForAddress(serverList[id]);
             client = new GSService.GSServiceClient(channel);
         }

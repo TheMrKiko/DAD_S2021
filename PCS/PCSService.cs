@@ -9,8 +9,11 @@ namespace PCS
     // ProcessCreationServiceBase is the generated base implementation of the service
     public class PCSService : ProcessCreationService.ProcessCreationServiceBase
     {
-        public PCSService()
+        private readonly string masterHostname;
+
+        public PCSService(string masterHostname)
         {
+            this.masterHostname = masterHostname;
         }
 
         public override Task<CreateClientReply> CreateClient(CreateClientRequest request, ServerCallContext context)
@@ -35,7 +38,7 @@ namespace PCS
             bool r;
             const string filename = "../../../../GClient/bin/debug/netcoreapp3.1/GClient";
             p.StartInfo.FileName = "cmd.exe";
-            p.StartInfo.Arguments = $" /c start {filename} {request.Username} {request.Url} {request.ScriptFile}";
+            p.StartInfo.Arguments = $" /c start {filename} {masterHostname} {request.Username} {request.Url} {request.ScriptFile}";
             r = p.Start();
 
             Console.WriteLine("Process started.");
@@ -48,7 +51,7 @@ namespace PCS
             bool r;
             const string filename = "../../../../GServer/bin/debug/netcoreapp3.1/GServer";
             p.StartInfo.FileName = "cmd.exe";
-            p.StartInfo.Arguments = $" /c start {filename} {request.Id} {request.Url} {request.MinDelay} {request.MaxDelay}";
+            p.StartInfo.Arguments = $" /c start {filename} {masterHostname} {request.Id} {request.Url} {request.MinDelay} {request.MaxDelay}";
             r = p.Start();
 
             Console.WriteLine("Process started.");

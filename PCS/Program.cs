@@ -1,11 +1,5 @@
 ﻿using Grpc.Core;
-using Grpc.Net.Client;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Security;
-using System.Threading;
 
 namespace PCS
 {
@@ -17,9 +11,11 @@ namespace PCS
             const int port = 10000;
             const string hostname = "localhost";
 
+            string masterHostname = args[0];
+
             Server server = new Server
             {
-                Services = { ProcessCreationService.BindService(new PCSService()) },
+                Services = { ProcessCreationService.BindService(new PCSService(masterHostname)) },
                 Ports = { new ServerPort(hostname, port, ServerCredentials.Insecure) }
             };
 

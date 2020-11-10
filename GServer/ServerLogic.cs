@@ -7,11 +7,13 @@ namespace GS
 {
     public class ServerLogic
     {
+        private const string masterPort = "10001";
         private readonly string id;
         private readonly string hostname;
         private readonly int port;
         private readonly int min_d;
         private readonly int max_d;
+        private readonly string masterHostname;
 
         private readonly Dictionary<string, string> data = new Dictionary<string, string>();
         private readonly Dictionary<string, string> serverList = new Dictionary<string, string>();
@@ -20,13 +22,14 @@ namespace GS
         private GrpcChannel channel;
         private PMasterService.PMasterServiceClient pmc;
 
-        public ServerLogic(string id, string hostname, int port, int min_d, int max_d)
+        public ServerLogic(string id, string hostname, int port, int min_d, int max_d, string masterHostname)
         {
             this.id = id;
             this.hostname = hostname;
             this.port = port;
             this.min_d = min_d;
             this.max_d = max_d;
+            this.masterHostname = masterHostname;
 
             StartServerServer();
 
@@ -75,8 +78,7 @@ namespace GS
             Console.WriteLine("Master, i'm ready for you!");
             Console.WriteLine("Waiting for some info on the network");
 
-            string masterHostname = "localhost";
-            channel = GrpcChannel.ForAddress($"http://{masterHostname}:10001");
+            channel = GrpcChannel.ForAddress($"http://{masterHostname}:{masterPort}");
             pmc = new PMasterService.PMasterServiceClient(channel);
             pmc.Register(new RegisterRequest { Id = id, Type = NodeType.Server });
         }

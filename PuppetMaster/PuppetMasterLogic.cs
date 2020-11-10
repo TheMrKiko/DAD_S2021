@@ -2,12 +2,7 @@
 using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Security.Policy;
-using System.Text;
 using System.Threading.Tasks;
 
 public delegate void DelAddMsg(string s);
@@ -61,10 +56,9 @@ namespace PuppetMaster
         {
             // Read the file and display it line by line.  
             string line; string[] split;
-            System.IO.StreamReader file = new System.IO.StreamReader($@"./{filename}.txt");
+            System.IO.StreamReader file = new System.IO.StreamReader($@"./{filename}");
             while ((line = file.ReadLine()) != null)
             {
-                System.Console.WriteLine(line);
                 split = line.Split();
                 switch (split[0])
                 {
@@ -103,6 +97,7 @@ namespace PuppetMaster
                         Console.WriteLine("Default case");
                         break;
                 }
+                Console.WriteLine(line);
             }
 
             file.Close();

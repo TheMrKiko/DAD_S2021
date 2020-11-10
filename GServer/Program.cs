@@ -1,8 +1,4 @@
-﻿using Grpc.Core;
-using System;
-using System.IO;
-using System.Security;
-using System.Threading;
+﻿using System;
 
 namespace GS
 {
@@ -11,16 +7,16 @@ namespace GS
 
         public static void Main(string[] args)
         {
-            const string hostname = "localhost";
-
-            string id = args[0];
-            string url = args[1];
-            int min_d = int.Parse(args[2]);
-            int max_d = int.Parse(args[3]);
+            string masterHostname = args[0];
+            string id = args[1];
+            string url = args[2];
+            int min_d = int.Parse(args[3]);
+            int max_d = int.Parse(args[4]);
 
             int port = new Uri(url).Port;
+            string hostname = new Uri(url).Host;
 
-            new ServerLogic(id, hostname, port, min_d, max_d);
+            new ServerLogic(id, hostname, port, min_d, max_d, masterHostname);
 
             while (true) ;
         }

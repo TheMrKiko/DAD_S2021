@@ -1,9 +1,8 @@
 {
   "profiles": {
-    "GServer": {
+    "PCS": {
       "commandName": "Project",
-      "commandLineArgs": "no-sec",
-      "remoteDebugEnabled": false
+      "commandLineArgs": "localhost"
     }
   }
 }
