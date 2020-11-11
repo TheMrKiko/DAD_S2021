@@ -20,7 +20,6 @@ namespace PuppetMaster
         ReplicateFactor,
         Partition,
         Server,
-        Client,
         Commands
     }
 
@@ -37,7 +36,7 @@ namespace PuppetMaster
         RegisterPartitionsRequest partitionsRequest; RegisterServersRequest serversRequest;
         //private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
 
-        private int n_nodes = 0;
+        private int n_init_servers = 0;
         private readonly Dictionary<string, List<string>> partitions = new Dictionary<string, List<string>>();
         private readonly Dictionary<string, (string url, GServerService.GServerServiceClient sc, PNodeService.PNodeServiceClient pnc)> serverMap =
             new Dictionary<string, (string, GServerService.GServerServiceClient, PNodeService.PNodeServiceClient)>();
@@ -47,7 +46,7 @@ namespace PuppetMaster
         public PuppetMasterLogic(PuppetMasterGUI guiWindow, string masterHostname, int masterPort)
         {
             this.masterHostname = masterHostname;
-            this.guiWindow = guiWindow;           
+            this.guiWindow = guiWindow;
 
             StartPMServer(masterHostname, masterPort);
         }
@@ -132,7 +131,7 @@ namespace PuppetMaster
                 lock (this)
                 {
                     serverMap[id] = (url, gserver, pns);
-                    n_nodes += 1;
+                    n_init_servers += 1;
                 }
 
             }
@@ -142,7 +141,7 @@ namespace PuppetMaster
 
         public void Client(string username, string url, string script_file)
         {
-            Task.WaitAll(SyncConfig(ConfigSteps.Client));
+            Task.WaitAll(SyncConfig(ConfigSteps.Commands));
             Uri uri = new Uri(url);
             pcschannel = GrpcChannel.ForAddress($"http://{uri.Host}:10000");
             pcs = new ProcessCreationService.ProcessCreationServiceClient(pcschannel);
@@ -156,10 +155,7 @@ namespace PuppetMaster
                 pns = new PNodeService.PNodeServiceClient(channel);
 
                 lock (this)
-                {
                     clientMap[username] = (url, gclient, pns);
-                    n_nodes += 1;
-                }
             }
         }
 
@@ -179,8 +175,30 @@ namespace PuppetMaster
 
         public void Register(string id, NodeType type)
         {
-            lock (this)
-                n_nodes -= 1;
+            switch (type)
+            {
+                case NodeType.Server:
+                    lock (this)
+                        n_init_servers -= 1;
+                    break;
+                case NodeType.Client:
+                    Console.WriteLine($"Client {id} alive. Informing them.");
+
+                    Task<RegisterPartitionsReply> partitionsReplies; Task<RegisterServersReply> serversReplies;
+
+                    lock (this)
+                    {
+                        partitionsReplies = clientMap[id].pnc.RegisterPartitionsAsync(partitionsRequest).ResponseAsync;
+                        serversReplies = clientMap[id].pnc.RegisterServersAsync(serversRequest).ResponseAsync;
+                    }
+                    Console.WriteLine("Informed. Waiting acks.");
+
+                    Task.WaitAll(serversReplies, partitionsReplies);
+                    Console.WriteLine($"Client {id} ready.");
+                    break;
+                default:
+                    break;
+            }
         }
 
         public void ServerShutdown()
@@ -198,11 +216,11 @@ namespace PuppetMaster
                     break;
                 case ConfigSteps.Server:
                     break;
-                case ConfigSteps.Client:
+                case ConfigSteps.Commands:
                     if (configStep == ConfigSteps.Server)
                     {
-                        configStep = ConfigSteps.Client;
-                        while (n_nodes != 0) { /*await Task.Delay(100);*/ }
+                        configStep = ConfigSteps.Commands;
+                        while (n_init_servers != 0) { /*await Task.Delay(100);*/ }
                         Console.WriteLine("Servers alive. Informing them.");
 
                         PartitionInfo pinfo;
@@ -234,31 +252,6 @@ namespace PuppetMaster
                         Task.WaitAll(serversReplies.ToArray());
                         Task.WaitAll(partitionsReplies.ToArray());
                         Console.WriteLine("Servers ready.");
-                    }
-                    break;
-                case ConfigSteps.Commands:
-                    if (configStep == ConfigSteps.Client)
-                    {
-                        configStep = ConfigSteps.Commands;
-                        while (n_nodes != 0) { /*await Task.Delay(100);*/ }
-                        Console.WriteLine("Clients alive. Informing them.");
-
-                        List<Task<RegisterPartitionsReply>> partitionsReplies = new List<Task<RegisterPartitionsReply>>();
-                        List<Task<RegisterServersReply>> serversReplies = new List<Task<RegisterServersReply>>();
-
-                        lock (this)
-                        {
-                            foreach (string c_id in clientMap.Keys)
-                            {
-                                partitionsReplies.Add(clientMap[c_id].pnc.RegisterPartitionsAsync(partitionsRequest).ResponseAsync);
-                                serversReplies.Add(clientMap[c_id].pnc.RegisterServersAsync(serversRequest).ResponseAsync);
-                            }
-                        }
-                        Console.WriteLine("Informed. Waiting acks.");
-
-                        Task.WaitAll(serversReplies.ToArray());
-                        Task.WaitAll(partitionsReplies.ToArray());
-                        Console.WriteLine("Clients ready.");
                     }
                     break;
                 default:
