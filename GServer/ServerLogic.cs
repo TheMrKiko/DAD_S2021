@@ -93,6 +93,15 @@ namespace GS
             Console.WriteLine("Done.");
         }
 
+        public List<(string id, bool master)> List()
+        {
+            List<(string id, bool master)> list = new List<(string id, bool master)>();
+            foreach (string p in data.Keys)
+                foreach (string obj_id in data[p].Keys)
+                    list.Add((obj_id, partitionList[p][0] == id));
+            return list;
+        }
+
         public void StartServerServer()
         {
             Server server = new Server

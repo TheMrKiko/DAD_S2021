@@ -2,6 +2,7 @@
 using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public delegate void DelAddMsg(string s);
 
@@ -17,7 +18,7 @@ namespace GC
         private readonly ClientGUI guiWindow;
         private readonly string username;
         private readonly string hostname;
-        private readonly int port;     
+        private readonly int port;
         private readonly string masterHostname;
 
         private Server server;
@@ -65,10 +66,10 @@ namespace GC
                         ReadObject(split[1], split[2], split[3]);
                         break;
                     case "listServer":
-                        //listServer s1
+                        ListServer(split[1]);
                         break;
                     case "wait":
-                        //2009
+                        Delay(int.Parse(split[1]));
                         break;
                     case "begin-repeat":
                         //5
@@ -76,6 +77,7 @@ namespace GC
                     case "end-repeat":
                         break;
                     case "listGlobal":
+                        ListGlobal();
                         break;
                     default:
                         Console.WriteLine("Default case");
@@ -116,6 +118,25 @@ namespace GC
 
             reply = client.WriteServer(request).Ok;
             AddMsgtoGUI($"Write: {reply}");
+        }
+
+        public void ListServer(string id)
+        {
+            Console.WriteLine("-- Info for server " + id + " --");
+            GSService.GSServiceClient client = new GSService.GSServiceClient(GrpcChannel.ForAddress(serverList[id]));
+            foreach (ObjectInfo objectInfo in client.ListServer(new ListServerRequest()).ObjInfo)
+                Console.WriteLine("Id: " + objectInfo.Id + " (is master: " + objectInfo.Master + ")");
+        }
+
+        public void ListGlobal()
+        {
+            foreach (string s_id in serverList.Keys)
+                ListServer(s_id);
+        }
+
+        public void Delay(int ms)
+        {
+            Task.WaitAll(Task.Delay(ms));
         }
 
         public void StartClientServer()

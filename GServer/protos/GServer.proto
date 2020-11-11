@@ -3,7 +3,7 @@
 service GSService {
   rpc ReadServer (ReadServerRequest) returns (ReadServerReply);
   rpc WriteServer (WriteServerRequest) returns (WriteServerReply);
-  //rpc ListServer (ListServerRequest) returns (ListServerReply);
+  rpc ListServer (ListServerRequest) returns (ListServerReply);
 }
 message ReadServerRequest {
   string partition_id = 1;
@@ -26,8 +26,14 @@ message ListServerRequest {
 }
 
 message ListServerReply {
-  repeated Object users = 1;
+  repeated ObjectInfo obj_info = 1;
 }
+
+message ObjectInfo {
+  string id = 1;
+  bool master = 2;
+}
+
 message Object {
    string value = 1;
 }

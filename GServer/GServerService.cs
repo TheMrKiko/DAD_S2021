@@ -1,5 +1,6 @@
 ﻿using Grpc.Core;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace GS
@@ -31,6 +32,15 @@ namespace GS
             Console.WriteLine("A client is " + context.Method);
             Console.WriteLine("-- As in: " + request);
             return Task.FromResult(Write(request));
+        }
+
+        public override Task<ListServerReply> ListServer(ListServerRequest request, ServerCallContext context)
+        {
+            ListServerReply reply = new ListServerReply();
+            List<(string, bool)> list = clientLogic.List();
+            foreach ((string id, bool master) obj in list)
+                reply.ObjInfo.Add(new ObjectInfo { Id = obj.id, Master = obj.master });
+            return Task.FromResult(reply);
         }
 
         private ReadServerReply Read(ReadServerRequest request)
