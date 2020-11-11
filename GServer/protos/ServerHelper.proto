@@ -1,0 +1,19 @@
+﻿syntax = "proto3";
+import "protos/GServer.proto";
+
+service SHelperService {
+  rpc LockData (LockDataRequest) returns (LockDataReply);
+  rpc WriteData (WriteDataRequest) returns (WriteDataReply);
+}
+message LockDataRequest { 
+}
+message LockDataReply {
+}
+message WriteDataRequest {
+  string partition_id = 1;
+  string object_id = 2;
+  Object new_object = 3;
+}
+message WriteDataReply {
+  bool ok = 1;
+}

@@ -4,46 +4,34 @@ using System.Threading.Tasks;
 
 namespace GS
 {
-    // GSService is the namespace defined in the protobuf
-    // GSServiceBase is the generated base implementation of the service
-    public class GServerService : GSService.GSServiceBase
+    // SHelperService is the namespace defined in the protobuf
+    // SHelperServiceBase is the generated base implementation of the service
+    public class ServerHelperService : SHelperService.SHelperServiceBase
     {
         private readonly ServerLogic clientLogic;
 
-        public GServerService(ServerLogic clientLogic)
+        public ServerHelperService(ServerLogic clientLogic)
         {
             this.clientLogic = clientLogic;
         }
 
-        public override Task<ReadServerReply> ReadServer(ReadServerRequest request, ServerCallContext context)
+        public override Task<LockDataReply> LockData(LockDataRequest request, ServerCallContext context)
         {
             Console.WriteLine();
             Console.WriteLine("--- Server ---");
-            Console.WriteLine("A client is " + context.Method);
-            Console.WriteLine("-- As in: " + request);
-            return Task.FromResult(Read(request));
+            Console.WriteLine("Locking...");
+            clientLogic.Lock();
+            return Task.FromResult(new LockDataReply());
         }
 
-        public override Task<WriteServerReply> WriteServer(WriteServerRequest request, ServerCallContext context)
+        public override Task<WriteDataReply> WriteData(WriteDataRequest request, ServerCallContext context)
         {
             Console.WriteLine();
             Console.WriteLine("--- Server ---");
-            Console.WriteLine("A client is " + context.Method);
-            Console.WriteLine("-- As in: " + request);
-            return Task.FromResult(Write(request));
-        }
-
-        private ReadServerReply Read(ReadServerRequest request)
-        {
-            string value = clientLogic.Read(request.ObjectId, request.PartitionId);
-
-            return new ReadServerReply { Object = new Object { Value = value } };
-        }
-
-        private WriteServerReply Write(WriteServerRequest request)
-        {
-            clientLogic.WriteAsMaster(request.ObjectId, request.PartitionId, request.NewObject.Value);
-            return new WriteServerReply { Ok = true };
+            Console.WriteLine("Writing...");
+            clientLogic.Write(request.ObjectId, request.PartitionId, request.NewObject.Value);
+            clientLogic.Unlock();
+            return Task.FromResult(new WriteDataReply { Ok = true });
         }
 
         /*public BcastMsgReply Bcast(BcastMsgRequest request) {

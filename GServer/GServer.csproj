@@ -18,6 +18,7 @@
     <Protobuf Include="protos\PuppetMaster.proto" GrpcServices="Client" />
     <Protobuf Include="protos\PuppetNode.proto" GrpcServices="Server" />
     <Protobuf Include="protos\PuppetServer.proto" GrpcServices="Server" />
+    <Protobuf Include="protos\ServerHelper.proto" GrpcServices="Both" />
   </ItemGroup>
 
 </Project>

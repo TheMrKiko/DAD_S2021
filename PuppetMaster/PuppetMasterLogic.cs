@@ -206,10 +206,9 @@ namespace PuppetMaster
                         Console.WriteLine("Servers alive. Informing them.");
 
                         PartitionInfo pinfo;
-                        RegisterPartitionsReply pr; RegisterServersReply sr;
                         partitionsRequest = new RegisterPartitionsRequest(); serversRequest = new RegisterServersRequest();
-                        HashSet<AsyncUnaryCall<RegisterPartitionsReply>> partitionsReplies = new HashSet<AsyncUnaryCall<RegisterPartitionsReply>>();
-                        HashSet<AsyncUnaryCall<RegisterServersReply>> serversReplies = new HashSet<AsyncUnaryCall<RegisterServersReply>>();
+                        List<Task<RegisterPartitionsReply>> partitionsReplies = new List<Task<RegisterPartitionsReply>>();
+                        List<Task<RegisterServersReply>> serversReplies = new List<Task<RegisterServersReply>>();
 
                         lock (this)
                         {
@@ -226,16 +225,14 @@ namespace PuppetMaster
 
                             foreach (string s_id in serverMap.Keys)
                             {
-                                partitionsReplies.Add(serverMap[s_id].pnc.RegisterPartitionsAsync(partitionsRequest));
-                                serversReplies.Add(serverMap[s_id].pnc.RegisterServersAsync(serversRequest));
+                                partitionsReplies.Add(serverMap[s_id].pnc.RegisterPartitionsAsync(partitionsRequest).ResponseAsync);
+                                serversReplies.Add(serverMap[s_id].pnc.RegisterServersAsync(serversRequest).ResponseAsync);
                             }
                         }
                         Console.WriteLine("Informed. Waiting acks.");
 
-                        foreach (AsyncUnaryCall<RegisterPartitionsReply> prc in partitionsReplies)
-                            pr = await prc;
-                        foreach (AsyncUnaryCall<RegisterServersReply> src in serversReplies)
-                            sr = await src;
+                        Task.WaitAll(serversReplies.ToArray());
+                        Task.WaitAll(partitionsReplies.ToArray());
                         Console.WriteLine("Servers ready.");
                     }
                     break;
@@ -246,24 +243,21 @@ namespace PuppetMaster
                         while (n_nodes != 0) { /*await Task.Delay(100);*/ }
                         Console.WriteLine("Clients alive. Informing them.");
 
-                        RegisterPartitionsReply pr; RegisterServersReply sr;
-                        HashSet<AsyncUnaryCall<RegisterPartitionsReply>> partitionsReplies = new HashSet<AsyncUnaryCall<RegisterPartitionsReply>>();
-                        HashSet<AsyncUnaryCall<RegisterServersReply>> serversReplies = new HashSet<AsyncUnaryCall<RegisterServersReply>>();
+                        List<Task<RegisterPartitionsReply>> partitionsReplies = new List<Task<RegisterPartitionsReply>>();
+                        List<Task<RegisterServersReply>> serversReplies = new List<Task<RegisterServersReply>>();
 
                         lock (this)
                         {
                             foreach (string c_id in clientMap.Keys)
                             {
-                                partitionsReplies.Add(clientMap[c_id].pnc.RegisterPartitionsAsync(partitionsRequest));
-                                serversReplies.Add(clientMap[c_id].pnc.RegisterServersAsync(serversRequest));
+                                partitionsReplies.Add(clientMap[c_id].pnc.RegisterPartitionsAsync(partitionsRequest).ResponseAsync);
+                                serversReplies.Add(clientMap[c_id].pnc.RegisterServersAsync(serversRequest).ResponseAsync);
                             }
                         }
                         Console.WriteLine("Informed. Waiting acks.");
 
-                        foreach (AsyncUnaryCall<RegisterPartitionsReply> prc in partitionsReplies)
-                            pr = await prc;
-                        foreach (AsyncUnaryCall<RegisterServersReply> src in serversReplies)
-                            sr = await src;
+                        Task.WaitAll(serversReplies.ToArray());
+                        Task.WaitAll(partitionsReplies.ToArray());
                         Console.WriteLine("Clients ready.");
                     }
                     break;

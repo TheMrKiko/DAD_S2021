@@ -2,6 +2,9 @@
 using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GS
 {
@@ -15,6 +18,7 @@ namespace GS
         private readonly int max_d;
         private readonly string masterHostname;
 
+        private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
         private readonly Dictionary<string, string> serverList = new Dictionary<string, string>();
         private readonly Dictionary<string, List<string>> partitionList = new Dictionary<string, List<string>>();
         private readonly Dictionary<string, Dictionary<string, string>> data = new Dictionary<string, Dictionary<string, string>>();
@@ -39,9 +43,9 @@ namespace GS
         public string Read(string objectId, string partitionId)
         {
             string value;
-
+            Console.WriteLine("Will read");
             lock (data)
-                if (data[partitionId] == null)
+                if (!data.ContainsKey(partitionId))
                     data[partitionId] = new Dictionary<string, string>();
 
             lock (data[partitionId])
@@ -51,14 +55,40 @@ namespace GS
             return value;
         }
 
+        public void WriteAsMaster(string objectId, string partitionId, string value)
+        {
+            List<SHelperService.SHelperServiceClient> serverClients = new List<SHelperService.SHelperServiceClient>();
+
+            foreach (string s_id in serverList.Keys)
+                if (s_id != id)
+                    serverClients.Add(ConnectToServer(s_id));
+
+            Console.WriteLine("Asking for locks.");
+            Task.WaitAll(serverClients.Select(cl =>
+                cl.LockDataAsync(new LockDataRequest()).ResponseAsync).ToArray()
+            );
+            Console.WriteLine("Locked. Asking to write");
+            Task.WaitAll(serverClients.Select(cl =>
+                cl.WriteDataAsync(new WriteDataRequest
+                {
+                    ObjectId = objectId,
+                    PartitionId = partitionId,
+                    NewObject = new Object { Value = value }
+                }).ResponseAsync).ToArray()
+            );
+
+            Console.WriteLine("Unlocked and written in others.");
+            lock (data)
+                Write(objectId, partitionId, value);
+        }
+
         public void Write(string objectId, string partitionId, string newObj)
         {
-            lock (data)
-                if (data[partitionId] == null)
-                    data[partitionId] = new Dictionary<string, string>();
+            Console.WriteLine("Starting to actually write...");
+            if (!data.ContainsKey(partitionId))
+                data[partitionId] = new Dictionary<string, string>();
 
-            lock (data[partitionId])
-                data[partitionId].Add(objectId, newObj);
+            data[partitionId].Add(objectId, newObj);
 
             Console.WriteLine("Done.");
         }
@@ -67,7 +97,11 @@ namespace GS
         {
             Server server = new Server
             {
-                Services = { GSService.BindService(new GServerService(this)), PNodeService.BindService(new PuppetNodeService(this)) },
+                Services = {
+                    GSService.BindService(new GServerService(this)),
+                    SHelperService.BindService(new ServerHelperService(this)),
+                    PNodeService.BindService(new PuppetNodeService(this))
+                },
                 Ports = { new ServerPort(hostname, port, ServerCredentials.Insecure) }
             };
 
@@ -89,6 +123,30 @@ namespace GS
             channel = GrpcChannel.ForAddress($"http://{masterHostname}:{masterPort}");
             pmc = new PMasterService.PMasterServiceClient(channel);
             pmc.Register(new RegisterRequest { Id = id, Type = NodeType.Server });
+        }
+
+        public SHelperService.SHelperServiceClient ConnectToServer(string id)
+        {
+            Console.WriteLine();
+            Console.WriteLine("--- Server ---");
+            Console.WriteLine("Will connect to server " + id);
+
+            channel = GrpcChannel.ForAddress(serverList[id]);
+            return new SHelperService.SHelperServiceClient(channel);
+        }
+
+        public bool Lock()
+        {
+            semaphore.Wait();
+            Console.WriteLine("Locked");
+            return true;
+        }
+
+        public bool Unlock()
+        {
+            semaphore.Release();
+            Console.WriteLine("Unlocked");
+            return true;
         }
 
         public void StorePartitions(Dictionary<string, List<string>> parts)
