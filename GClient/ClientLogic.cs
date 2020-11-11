@@ -2,6 +2,7 @@
 using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 public delegate void DelAddMsg(string s);
@@ -52,41 +53,63 @@ namespace GC
         public void ExecuteCommands(string filename)
         {
             // Read the file and display it line by line.  
-            string line; string[] split;
-            System.IO.StreamReader file = new System.IO.StreamReader(@$"../../../../GClient/bin/debug/netcoreapp3.1/{filename}");
-            while ((line = file.ReadLine()) != null)
-            {
-                split = line.Split();
-                switch (split[0])
-                {
-                    case "write":
-                        WriteObject(split[1], split[2], line.Split('"')[1]); //write p1 obj -$i "value-$i"
-                        break;
-                    case "read":
-                        ReadObject(split[1], split[2], split[3]);
-                        break;
-                    case "listServer":
-                        ListServer(split[1]);
-                        break;
-                    case "wait":
-                        Delay(int.Parse(split[1]));
-                        break;
-                    case "begin-repeat":
-                        //5
-                        break;
-                    case "end-repeat":
-                        break;
-                    case "listGlobal":
-                        ListGlobal();
-                        break;
-                    default:
-                        Console.WriteLine("Default case");
-                        break;
-                }
-                Console.WriteLine(line);
-            }
+            string[] lines = System.IO.File.ReadAllLines(@$"../../../../GClient/bin/debug/netcoreapp3.1/{filename}");
+            ParseLines(lines.ToList());
 
-            file.Close();
+            void ParseLines(List<string> lines, string i = "$i")
+            {
+                string command; string[] split;
+                bool repeat = false; int times = 0;
+                List<string> commands = new List<string>();
+
+                foreach (string line in lines)
+                {
+                    command = line.Replace("$i", i); split = command.Split();
+
+                    Console.WriteLine();
+                    Console.WriteLine($"Starting command: {command}");
+
+                    if (repeat)
+                        switch (split[0])
+                        {
+                            case "end-repeat":
+                                foreach (int j in Enumerable.Range(0, times))
+                                    ParseLines(commands, j.ToString());
+                                repeat = false;
+                                break;
+                            default:
+                                commands.Add(command);
+                                break;
+                        }
+                    else
+                        switch (split[0])
+                        {
+                            case "write":
+                                WriteObject(split[1], split[2], command.Split('"')[1]);
+                                break;
+                            case "read":
+                                ReadObject(split[1], split[2], split[3]);
+                                break;
+                            case "listServer":
+                                ListServer(split[1]);
+                                break;
+                            case "wait":
+                                Delay(int.Parse(split[1]));
+                                break;
+                            case "begin-repeat":
+                                times = int.Parse(split[1]);
+                                commands = new List<string>();
+                                repeat = true;
+                                break;
+                            case "listGlobal":
+                                ListGlobal();
+                                break;
+                            default:
+                                Console.WriteLine("Default case");
+                                break;
+                        }
+                }
+            }
         }
 
         public void ReadObject(string part_id, string obj_id, string server_id)
