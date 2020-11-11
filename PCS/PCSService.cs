@@ -38,7 +38,7 @@ namespace PCS
             bool r;
             const string filename = "../../../../GClient/bin/debug/netcoreapp3.1/GClient";
             p.StartInfo.FileName = "cmd.exe";
-            p.StartInfo.Arguments = $" /c start {filename} {masterHostname} {request.Username} {request.Url} {request.ScriptFile}";
+            p.StartInfo.Arguments = $" /c start \"Client {request.Username}\" {filename} {masterHostname} {request.Username} {request.Url} {request.ScriptFile}";
             r = p.Start();
 
             Console.WriteLine("Process started.");
@@ -51,7 +51,7 @@ namespace PCS
             bool r;
             const string filename = "../../../../GServer/bin/debug/netcoreapp3.1/GServer";
             p.StartInfo.FileName = "cmd.exe";
-            p.StartInfo.Arguments = $" /c start {filename} {masterHostname} {request.Id} {request.Url} {request.MinDelay} {request.MaxDelay}";
+            p.StartInfo.Arguments = $" /c start \"Server {request.Id}\" {filename} {masterHostname} {request.Id} {request.Url} {request.MinDelay} {request.MaxDelay}";
             r = p.Start();
 
             Console.WriteLine("Process started.");
