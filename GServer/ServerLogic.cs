@@ -59,7 +59,7 @@ namespace GS
         {
             List<SHelperService.SHelperServiceClient> serverClients = new List<SHelperService.SHelperServiceClient>();
 
-            foreach (string s_id in serverList.Keys)
+            foreach (string s_id in partitionList[partitionId])
                 if (s_id != id)
                     serverClients.Add(ConnectToServer(s_id));
 
@@ -99,6 +99,7 @@ namespace GS
             foreach (string p in data.Keys)
                 foreach (string obj_id in data[p].Keys)
                     list.Add((obj_id, partitionList[p][0] == id));
+            //throw new Exception("Deu bug");
             return list;
         }
 
