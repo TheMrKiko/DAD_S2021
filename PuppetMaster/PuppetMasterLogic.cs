@@ -77,23 +77,22 @@ namespace PuppetMaster
                         Client(split[1], split[2], split[3]);
                         break;
                     case "Status":
-                        Task.WaitAll(SyncConfig(ConfigSteps.Commands));
+                        Status();
                         break;
-                    case "Wait 2000":
-                        Task.WaitAll(SyncConfig(ConfigSteps.Commands));
+                    case "Wait":
+                        Wait(int.Parse(split[1]));
                         break;
-                    case "Freeze s1":
-                        Task.WaitAll(SyncConfig(ConfigSteps.Commands));
+                    case "Freeze":
+                        Freeze(split[1]);
                         break;
-                    case "Unfreeze s1":
-                        Task.WaitAll(SyncConfig(ConfigSteps.Commands));
+                    case "Unfreeze":
+                        Unfreeze(split[1]);
                         break;
                     case "Crash s2":
                         Task.WaitAll(SyncConfig(ConfigSteps.Commands));
                         break;
                     default:
-                        Task.WaitAll(SyncConfig(ConfigSteps.Commands));
-                        Console.WriteLine("Default case");
+                        Console.WriteLine("Not a command.");
                         break;
                 }
                 Console.WriteLine(line);
@@ -157,6 +156,45 @@ namespace PuppetMaster
                 lock (this)
                     clientMap[username] = (url, gclient, pns);
             }
+        }
+
+        public void Status()
+        {
+            Task.WaitAll(SyncConfig(ConfigSteps.Commands));
+            List<Task<StatusReply>> nodeReplies = new List<Task<StatusReply>>();
+            StatusRequest request = new StatusRequest();
+            lock (this)
+            {
+                foreach (string s_id in serverMap.Keys)
+                    nodeReplies.Add(serverMap[s_id].pnc.StatusAsync(request).ResponseAsync);
+                foreach (string c_id in clientMap.Keys)
+                    nodeReplies.Add(clientMap[c_id].pnc.StatusAsync(request).ResponseAsync);
+            }
+
+            Task.WaitAll(nodeReplies.ToArray());
+
+            Console.WriteLine("Told nodes to status themselves.");
+        }
+
+        public void Wait(int ms)
+        {
+            Task.WaitAll(SyncConfig(ConfigSteps.Commands), Task.Delay(ms));
+        }
+
+        public void Freeze(string id)
+        {
+            Task.WaitAll(SyncConfig(ConfigSteps.Commands));
+
+            PServerService.PServerServiceClient client = new PServerService.PServerServiceClient(GrpcChannel.ForAddress(serverMap[id].url));
+            client.Freeze(new FreezeRequest());
+        }
+
+        public void Unfreeze(string id)
+        {
+            Task.WaitAll(SyncConfig(ConfigSteps.Commands));
+
+            PServerService.PServerServiceClient client = new PServerService.PServerServiceClient(GrpcChannel.ForAddress(serverMap[id].url));
+            client.Unfreeze(new UnfreezeRequest());
         }
 
         private void StartPMServer(string serverHostname, int serverPort)

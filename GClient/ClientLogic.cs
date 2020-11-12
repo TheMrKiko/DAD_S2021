@@ -69,19 +69,7 @@ namespace GC
                     Console.WriteLine();
                     Console.WriteLine($"Starting command: {command}");
 
-                    if (repeat)
-                        switch (split[0])
-                        {
-                            case "end-repeat":
-                                foreach (int j in Enumerable.Range(0, times))
-                                    ParseLines(commands, j.ToString());
-                                repeat = false;
-                                break;
-                            default:
-                                commands.Add(command);
-                                break;
-                        }
-                    else
+                    if (!repeat)
                         switch (split[0])
                         {
                             case "write":
@@ -105,7 +93,19 @@ namespace GC
                                 ListGlobal();
                                 break;
                             default:
-                                Console.WriteLine("Default case");
+                                Console.WriteLine("Not a command.");
+                                break;
+                        }
+                    else
+                        switch (split[0])
+                        {
+                            case "end-repeat":
+                                foreach (int j in Enumerable.Range(0, times))
+                                    ParseLines(commands, j.ToString());
+                                repeat = false;
+                                break;
+                            default:
+                                commands.Add(command);
                                 break;
                         }
                 }
@@ -225,6 +225,12 @@ namespace GC
                 foreach (string s_id in servers.Keys)
                     this.serverList[s_id] = servers[s_id];
             Registed();
+        }
+
+        public void Status()
+        {
+            Console.WriteLine($"Servers: {serverList}");
+            Console.WriteLine($"Partitions: {partitionList}");
         }
 
         public bool AddMsgtoGUI(string s)

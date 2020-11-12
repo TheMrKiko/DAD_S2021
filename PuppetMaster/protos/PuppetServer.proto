@@ -1,0 +1,19 @@
+﻿syntax = "proto3";
+
+service PServerService {
+  rpc Crash (CrashRequest) returns (CrashReply);
+  rpc Freeze (FreezeRequest) returns (FreezeReply);
+  rpc Unfreeze (UnfreezeRequest) returns (UnfreezeReply);
+}
+message CrashRequest {
+}
+message CrashReply {
+}
+message FreezeRequest {
+}
+message FreezeReply {
+}
+message UnfreezeRequest {
+}
+message UnfreezeReply {
+}

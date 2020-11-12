@@ -19,6 +19,7 @@ namespace GS
         private readonly string masterHostname;
 
         private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
+        private readonly ManualResetEventSlim manual = new ManualResetEventSlim(true);
         private readonly Dictionary<string, string> serverList = new Dictionary<string, string>();
         private readonly Dictionary<string, List<string>> partitionList = new Dictionary<string, List<string>>();
         private readonly Dictionary<string, Dictionary<string, string>> data = new Dictionary<string, Dictionary<string, string>>();
@@ -42,6 +43,8 @@ namespace GS
 
         public string Read(string objectId, string partitionId)
         {
+            CheckFreeze();
+
             string value;
             Console.WriteLine("Will read");
             lock (data)
@@ -57,6 +60,8 @@ namespace GS
 
         public void WriteAsMaster(string objectId, string partitionId, string value)
         {
+            CheckFreeze();
+
             List<SHelperService.SHelperServiceClient> serverClients = new List<SHelperService.SHelperServiceClient>();
 
             foreach (string s_id in partitionList[partitionId])
@@ -84,6 +89,8 @@ namespace GS
 
         public void Write(string objectId, string partitionId, string newObj)
         {
+            CheckFreeze();
+
             Console.WriteLine("Starting to actually write...");
             if (!data.ContainsKey(partitionId))
                 data[partitionId] = new Dictionary<string, string>();
@@ -95,12 +102,25 @@ namespace GS
 
         public List<(string id, bool master)> List()
         {
+            CheckFreeze();
+
             List<(string id, bool master)> list = new List<(string id, bool master)>();
             foreach (string p in data.Keys)
                 foreach (string obj_id in data[p].Keys)
                     list.Add((obj_id, partitionList[p][0] == id));
             //throw new Exception("Deu bug");
             return list;
+        }
+
+        public void Freeze()
+        {
+            manual.Reset();
+            Console.WriteLine("Frozen.");
+        }
+        public void Unfreeze()
+        {
+            manual.Set();
+            Console.WriteLine("Let it go!");
         }
 
         public void StartServerServer()
@@ -110,7 +130,8 @@ namespace GS
                 Services = {
                     GSService.BindService(new GServerService(this)),
                     SHelperService.BindService(new ServerHelperService(this)),
-                    PNodeService.BindService(new PuppetNodeService(this))
+                    PNodeService.BindService(new PuppetNodeService(this)),
+                    PServerService.BindService(new PuppetServerService(this))
                 },
                 Ports = { new ServerPort(hostname, port, ServerCredentials.Insecure) }
             };
@@ -147,6 +168,8 @@ namespace GS
 
         public bool Lock()
         {
+            CheckFreeze();
+
             semaphore.Wait();
             Console.WriteLine("Locked");
             return true;
@@ -154,13 +177,24 @@ namespace GS
 
         public bool Unlock()
         {
+            CheckFreeze();
+
             semaphore.Release();
             Console.WriteLine("Unlocked");
             return true;
         }
 
+        public void CheckFreeze()
+        {
+            if (!manual.IsSet)
+                Console.WriteLine("This frozen. Will wait a bit...");
+            manual.Wait();
+        }
+
         public void StorePartitions(Dictionary<string, List<string>> parts)
         {
+            CheckFreeze();
+
             lock (this)
                 foreach (string p_id in parts.Keys)
                     this.partitionList[p_id] = parts[p_id];
@@ -168,9 +202,20 @@ namespace GS
 
         public void StoreServers(Dictionary<string, string> servers)
         {
+            CheckFreeze();
+
             lock (this)
                 foreach (string s_id in servers.Keys)
                     this.serverList[s_id] = servers[s_id];
+        }
+
+        public void Status()
+        {
+            CheckFreeze();
+
+            Console.WriteLine($"Servers: {serverList}");
+            Console.WriteLine($"Partitions: {partitionList}");
+            Console.WriteLine($"Data stored: {data}");
         }
     }
 }

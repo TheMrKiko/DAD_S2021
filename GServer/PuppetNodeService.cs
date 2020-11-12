@@ -49,7 +49,12 @@ namespace GS
 
         public override Task<StatusReply> Status(StatusRequest request, ServerCallContext context)
         {
-            return base.Status(request, context);
+            Console.WriteLine();
+            Console.WriteLine("--- Server ---");
+            Console.WriteLine("Master says to " + context.Method);
+
+            this.serverLogic.Status();
+            return Task.FromResult(new StatusReply());
         }
     }
 }
