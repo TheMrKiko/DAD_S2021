@@ -36,10 +36,13 @@ namespace GS
 
         public override Task<ListServerReply> ListServer(ListServerRequest request, ServerCallContext context)
         {
+            Console.WriteLine();
+            Console.WriteLine("--- Server ---");
+            Console.WriteLine("A client is " + context.Method);
             ListServerReply reply = new ListServerReply();
             List<(string, bool)> list = clientLogic.List();
-            foreach ((string id, bool master) obj in list)
-                reply.ObjInfo.Add(new ObjectInfo { Id = obj.id, Master = obj.master });
+            foreach ((string id, bool master) in list)
+                reply.ObjInfo.Add(new ObjectInfo { Id = id, Master = master });
             return Task.FromResult(reply);
         }
 

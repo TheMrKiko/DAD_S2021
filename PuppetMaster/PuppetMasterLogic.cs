@@ -58,6 +58,9 @@ namespace PuppetMaster
             System.IO.StreamReader file = new System.IO.StreamReader($@"./{filename}");
             while ((line = file.ReadLine()) != null)
             {
+                Console.WriteLine();
+                Console.WriteLine($"Starting command: {line}");
+
                 split = line.Split();
                 switch (split[0])
                 {
@@ -95,7 +98,6 @@ namespace PuppetMaster
                         Console.WriteLine("Not a command.");
                         break;
                 }
-                Console.WriteLine(line);
             }
 
             file.Close();
