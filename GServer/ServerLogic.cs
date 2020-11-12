@@ -45,15 +45,16 @@ namespace GS
         {
             CheckFreeze();
 
-            string value;
             Console.WriteLine("Will read");
-            lock (data)
-                if (!data.ContainsKey(partitionId))
-                    data[partitionId] = new Dictionary<string, string>();
 
-            lock (data[partitionId])
-                if (!data[partitionId].TryGetValue(objectId, out value))
-                    value = "N/A";
+            Lock();
+            if (!data.ContainsKey(partitionId))
+                data[partitionId] = new Dictionary<string, string>();
+
+            if (!data[partitionId].TryGetValue(objectId, out string value))
+                value = "N/A";
+            Unlock();
+
             Console.WriteLine("For partition " + partitionId + " and id " + objectId + ", i have " + value);
             return value;
         }
@@ -83,8 +84,10 @@ namespace GS
             );
 
             Console.WriteLine("Unlocked and written in others.");
-            lock (data)
-                Write(objectId, partitionId, value);
+
+            Lock();
+            Write(objectId, partitionId, value);
+            Unlock();
         }
 
         public void Write(string objectId, string partitionId, string newObj)
@@ -107,8 +110,7 @@ namespace GS
             List<(string id, bool master)> list = new List<(string id, bool master)>();
             foreach (string p in data.Keys)
                 foreach (string obj_id in data[p].Keys)
-                    list.Add((obj_id, partitionList[p][0] == id));
-            //throw new Exception("Deu bug");
+                    list.Add((obj_id, partitionList[p][0] == id));            
             return list;
         }
 
@@ -166,21 +168,22 @@ namespace GS
             return new SHelperService.SHelperServiceClient(channel);
         }
 
-        public bool Lock()
+        public bool Lock(bool verbose = false)
         {
             CheckFreeze();
 
+            if (semaphore.CurrentCount == 0) Console.WriteLine("Full. Waiting...");
             semaphore.Wait();
-            Console.WriteLine("Locked");
+            if (verbose) Console.WriteLine("Locked.");
             return true;
         }
 
-        public bool Unlock()
+        public bool Unlock(bool verbose = false)
         {
             CheckFreeze();
 
             semaphore.Release();
-            Console.WriteLine("Unlocked");
+            if (verbose) Console.WriteLine("Unlocked");
             return true;
         }
 
@@ -195,18 +198,20 @@ namespace GS
         {
             CheckFreeze();
 
-            lock (this)
-                foreach (string p_id in parts.Keys)
-                    this.partitionList[p_id] = parts[p_id];
+            Lock();
+            foreach (string p_id in parts.Keys)
+                this.partitionList[p_id] = parts[p_id];
+            Unlock();
         }
 
         public void StoreServers(Dictionary<string, string> servers)
         {
             CheckFreeze();
 
-            lock (this)
-                foreach (string s_id in servers.Keys)
-                    this.serverList[s_id] = servers[s_id];
+            Lock();
+            foreach (string s_id in servers.Keys)
+                this.serverList[s_id] = servers[s_id];
+            Unlock();
         }
 
         public void Status()

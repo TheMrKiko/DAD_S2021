@@ -20,7 +20,7 @@ namespace GS
             Console.WriteLine();
             Console.WriteLine("--- Server ---");
             Console.WriteLine("Locking...");
-            clientLogic.Lock();
+            clientLogic.Lock(true);
             return Task.FromResult(new LockDataReply());
         }
 
@@ -30,7 +30,7 @@ namespace GS
             Console.WriteLine("--- Server ---");
             Console.WriteLine("Writing...");
             clientLogic.Write(request.ObjectId, request.PartitionId, request.NewObject.Value);
-            clientLogic.Unlock();
+            clientLogic.Unlock(true);
             return Task.FromResult(new WriteDataReply { Ok = true });
         }
 
