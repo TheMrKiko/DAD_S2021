@@ -17,7 +17,11 @@ namespace GS
 
         public override Task<CrashReply> Crash(CrashRequest request, ServerCallContext context)
         {
-            return base.Crash(request, context);
+            Console.WriteLine();
+            Console.WriteLine("--- Server ---");
+            Console.WriteLine("Crashing...");
+            clientLogic.Crash();
+            return Task.FromResult(new CrashReply());
         }
 
         public override Task<FreezeReply> Freeze(FreezeRequest request, ServerCallContext context)

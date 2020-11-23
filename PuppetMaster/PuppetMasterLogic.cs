@@ -91,8 +91,8 @@ namespace PuppetMaster
                     case "Unfreeze":
                         Unfreeze(split[1]);
                         break;
-                    case "Crash s2":
-                        Task.WaitAll(SyncConfig(ConfigSteps.Commands));
+                    case "Crash":
+                        Crash(split[1]);
                         break;
                     default:
                         Console.WriteLine("Not a command.");
@@ -197,6 +197,14 @@ namespace PuppetMaster
 
             PServerService.PServerServiceClient client = new PServerService.PServerServiceClient(GrpcChannel.ForAddress(serverMap[id].url));
             client.Unfreeze(new UnfreezeRequest());
+        }
+
+        public void Crash(string id)
+        {
+            Task.WaitAll(SyncConfig(ConfigSteps.Commands));
+
+            PServerService.PServerServiceClient client = new PServerService.PServerServiceClient(GrpcChannel.ForAddress(serverMap[id].url));
+            client.Crash(new CrashRequest());
         }
 
         private void StartPMServer(string serverHostname, int serverPort)

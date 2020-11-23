@@ -24,6 +24,7 @@ namespace GS
         private readonly Dictionary<string, List<string>> partitionList = new Dictionary<string, List<string>>();
         private readonly Dictionary<string, Dictionary<string, string>> data = new Dictionary<string, Dictionary<string, string>>();
 
+        private Server server;
         private GrpcChannel channel;
         private PMasterService.PMasterServiceClient pmc;
 
@@ -110,8 +111,22 @@ namespace GS
             List<(string id, bool master)> list = new List<(string id, bool master)>();
             foreach (string p in data.Keys)
                 foreach (string obj_id in data[p].Keys)
-                    list.Add((obj_id, partitionList[p][0] == id));            
+                    list.Add((obj_id, partitionList[p][0] == id));
             return list;
+        }
+
+        public void Crash()
+        {
+            CheckFreeze();
+
+            Task.Run(() =>
+            {
+                server.KillAsync();
+                Console.WriteLine("Dead.");
+            });
+
+            //System.Diagnostics.Process process = System.Diagnostics.Process.GetCurrentProcess();
+            //process.CloseMainWindow();
         }
 
         public void Freeze()
@@ -127,7 +142,7 @@ namespace GS
 
         public void StartServerServer()
         {
-            Server server = new Server
+            server = new Server
             {
                 Services = {
                     GSService.BindService(new GServerService(this)),
