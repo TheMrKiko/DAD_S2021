@@ -189,7 +189,7 @@ namespace GS
 
             server.Start();
 
-            Console.WriteLine("Insecure ChatServer server listening on port " + port);
+            Console.WriteLine("Insecure Server server listening on port " + port);
 
             //Configuring HTTP for client connections in Register method
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);

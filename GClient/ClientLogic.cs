@@ -165,10 +165,19 @@ namespace GC
 
         public void ListServer(string id)
         {
-            Console.WriteLine("-- Info for server " + id + " --");
-            GSService.GSServiceClient client = new GSService.GSServiceClient(GrpcChannel.ForAddress(serverList[id]));
-            foreach (ObjectInfo objectInfo in client.ListServer(new ListServerRequest()).ObjInfo)
-                Console.WriteLine("Id: " + objectInfo.Id + " (is master: " + objectInfo.Master + ")");
+            try
+            {
+                Console.WriteLine("-- Info for server " + id + " --");
+                GSService.GSServiceClient client = new GSService.GSServiceClient(GrpcChannel.ForAddress(serverList[id]));
+                foreach (ObjectInfo objectInfo in client.ListServer(new ListServerRequest()).ObjInfo)
+                    Console.WriteLine("Id: " + objectInfo.Id + " (is master: " + objectInfo.Master + ")");
+            }
+            catch (Exception)
+            {
+                Console.WriteLine($"Warning: Server {id} might me down.");
+                //if (ServerDown(id))
+                //serverClients.Remove(id);
+            }
         }
 
         public void ListGlobal()
@@ -194,7 +203,7 @@ namespace GC
 
             server.Start();
 
-            Console.WriteLine("Insecure ChatServer server listening on port " + port);
+            Console.WriteLine("Insecure Client server listening on port " + port);
 
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
         }

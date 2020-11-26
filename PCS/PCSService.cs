@@ -69,7 +69,7 @@ namespace PCS
             Console.WriteLine("Process started.");
             return new CreateServerReply { Ok = r };
         }
-        private KillReply KillNodes(KillRequest request)
+        private KillReply KillNodes(KillRequest _)
         {
             foreach (Process p in processList)
             {

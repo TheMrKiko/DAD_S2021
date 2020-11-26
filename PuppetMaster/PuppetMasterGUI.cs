@@ -15,7 +15,7 @@ namespace PuppetMaster
             Task.Run(() => puppetLogic.ExecuteCommands(filename));
         }
 
-        private void btReg_Click(object sender, EventArgs e) {
+        private void BtReg_Click(object sender, EventArgs e) {
             /*foreach (string nick in puppetLogic.Register(tbNick.Text, tbPort.Text)) {
                 tbRegResult.Text += nick + "\r\n";
             }
@@ -23,15 +23,15 @@ namespace PuppetMaster
             tbPort.Enabled = false;*/
         }
 
-        public void AddMsgtoGUI(string m) {
+        public void AddMsgtoGUI(string _) {
             //tbConv.Text += m + "\r\n"; 
         }
 
-        private void form1_Closing(object sender, FormClosingEventArgs e) {
+        private void Form1_Closing(object sender, FormClosingEventArgs e) {
             puppetLogic.ServerShutdown();
         }
 
-        private async void btSend_Click(object sender, EventArgs e) {
+        private void BtSend_Click(object sender, EventArgs e) {
             /*string m = tbMsg.Text;
             await puppetLogic.BcastMsg(m);
             tbConv.Text += "me: " + tbMsg.Text + "\r\n";

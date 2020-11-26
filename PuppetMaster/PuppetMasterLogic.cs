@@ -25,7 +25,7 @@ namespace PuppetMaster
 
     public class PuppetMasterLogic : IPuppetMasterGUI
     {
-        private readonly PuppetMasterGUI guiWindow;
+        //private readonly PuppetMasterGUI guiWindow;
         private readonly string masterHostname;
 
         private ConfigSteps configStep;
@@ -43,10 +43,10 @@ namespace PuppetMaster
         private readonly Dictionary<string, (string url, GCService.GCServiceClient sc, PNodeService.PNodeServiceClient pnc)> clientMap =
             new Dictionary<string, (string, GCService.GCServiceClient, PNodeService.PNodeServiceClient)>();
 
-        public PuppetMasterLogic(PuppetMasterGUI guiWindow, string masterHostname, int masterPort)
+        public PuppetMasterLogic(PuppetMasterGUI _, string masterHostname, int masterPort)
         {
             this.masterHostname = masterHostname;
-            this.guiWindow = guiWindow;
+            //this.guiWindow = guiWindow;
 
             StartPMServer(masterHostname, masterPort);
         }
@@ -103,12 +103,12 @@ namespace PuppetMaster
             file.Close();
         }
 
-        public void ReplicationFactor(int r)
+        public void ReplicationFactor(int _)
         {
             return;
         }
 
-        public void Partitions(int n, string id, List<string> serverids)
+        public void Partitions(int _, string id, List<string> serverids)
         {
             lock (this)
                 partitions[id] = serverids;
@@ -116,7 +116,7 @@ namespace PuppetMaster
 
         public void Server(string id, string url, int min_delay, int max_delay)
         {
-            Task.WaitAll(SyncConfig(ConfigSteps.Server));
+            SyncConfig(ConfigSteps.Server);
             Uri uri = new Uri(url);
             pcschannel = GrpcChannel.ForAddress($"http://{uri.Host}:10000");
             pcs = new ProcessCreationService.ProcessCreationServiceClient(pcschannel);
@@ -142,7 +142,7 @@ namespace PuppetMaster
 
         public void Client(string username, string url, string script_file)
         {
-            Task.WaitAll(SyncConfig(ConfigSteps.Commands));
+            SyncConfig(ConfigSteps.Commands);
             Uri uri = new Uri(url);
             pcschannel = GrpcChannel.ForAddress($"http://{uri.Host}:10000");
             pcs = new ProcessCreationService.ProcessCreationServiceClient(pcschannel);
@@ -162,14 +162,14 @@ namespace PuppetMaster
 
         public void Kill()
         {
-            pcschannel = GrpcChannel.ForAddress($"http://{"localhost"}:10000");
+            pcschannel = GrpcChannel.ForAddress($"http://{masterHostname}:10000");
             pcs = new ProcessCreationService.ProcessCreationServiceClient(pcschannel);
             pcs.Kill(new KillRequest());
         }
 
         public void Status()
         {
-            Task.WaitAll(SyncConfig(ConfigSteps.Commands));
+            SyncConfig(ConfigSteps.Commands);
             List<Task<StatusReply>> nodeReplies = new List<Task<StatusReply>>();
             StatusRequest request = new StatusRequest();
             lock (this)
@@ -187,12 +187,13 @@ namespace PuppetMaster
 
         public void Wait(int ms)
         {
-            Task.WaitAll(SyncConfig(ConfigSteps.Commands), Task.Delay(ms));
+            SyncConfig(ConfigSteps.Commands);
+            Task.Delay(ms).Wait();
         }
 
         public void Freeze(string id)
         {
-            Task.WaitAll(SyncConfig(ConfigSteps.Commands));
+            SyncConfig(ConfigSteps.Commands);
 
             PServerService.PServerServiceClient client = new PServerService.PServerServiceClient(GrpcChannel.ForAddress(serverMap[id].url));
             client.Freeze(new FreezeRequest());
@@ -200,7 +201,7 @@ namespace PuppetMaster
 
         public void Unfreeze(string id)
         {
-            Task.WaitAll(SyncConfig(ConfigSteps.Commands));
+            SyncConfig(ConfigSteps.Commands);
 
             PServerService.PServerServiceClient client = new PServerService.PServerServiceClient(GrpcChannel.ForAddress(serverMap[id].url));
             client.Unfreeze(new UnfreezeRequest());
@@ -208,7 +209,7 @@ namespace PuppetMaster
 
         public void Crash(string id)
         {
-            Task.WaitAll(SyncConfig(ConfigSteps.Commands));
+            SyncConfig(ConfigSteps.Commands);
 
             PServerService.PServerServiceClient client = new PServerService.PServerServiceClient(GrpcChannel.ForAddress(serverMap[id].url));
             client.Crash(new CrashRequest());
@@ -223,7 +224,7 @@ namespace PuppetMaster
             };
             server.Start();
 
-            Console.WriteLine("Insecure ChatServer server listening on port " + serverPort);
+            Console.WriteLine("Insecure PupperMaster server listening on port " + serverPort);
 
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
         }
@@ -261,7 +262,7 @@ namespace PuppetMaster
             server.ShutdownAsync().Wait();
         }
 
-        private async Task SyncConfig(ConfigSteps config)
+        private void SyncConfig(ConfigSteps config)
         {
             switch (config)
             {

@@ -70,7 +70,7 @@
             this.btwrite.TabIndex = 5;
             this.btwrite.Text = "Write";
             this.btwrite.UseVisualStyleBackColor = true;
-            this.btwrite.Click += new System.EventHandler(this.btWrite_Click);
+            this.btwrite.Click += new System.EventHandler(this.BtWrite_Click);
             // 
             // newvalue
             // 
@@ -116,7 +116,7 @@
             this.readbt.TabIndex = 5;
             this.readbt.Text = "Read";
             this.readbt.UseVisualStyleBackColor = true;
-            this.readbt.Click += new System.EventHandler(this.btRead_Click);
+            this.readbt.Click += new System.EventHandler(this.BtRead_Click);
             // 
             // label1
             // 
@@ -154,7 +154,7 @@
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "ClientGUI";
             this.Text = "ClientGUI";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.form1_Closing);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_Closing);
             this.ResumeLayout(false);
             this.PerformLayout();
 

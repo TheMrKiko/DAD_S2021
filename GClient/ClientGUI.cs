@@ -15,12 +15,12 @@ namespace GC
 
         public void AddMsgtoGUI(string m) { logs.Text += m + "\r\n"; }
 
-        private void form1_Closing(object sender, FormClosingEventArgs e) {
+        private void Form1_Closing(object sender, FormClosingEventArgs e) {
             clientLogic.ServerShutdown();
         }
 
-        private async void btRead_Click(object sender, EventArgs e) {
-            string m = newvalue.Text;
+        private void BtRead_Click(object sender, EventArgs e) {
+            //string m = newvalue.Text;
 
             //await clientLogic.BcastMsg(m);
             /*tbConv.Text += "me: " + tbMsg.Text + "\r\n";
@@ -28,7 +28,7 @@ namespace GC
             clientLogic.ReadObject(pid.Text, objid.Text, serverid.Text);
         }
 
-        private void btWrite_Click(object sender, EventArgs e)
+        private void BtWrite_Click(object sender, EventArgs e)
         {
             /*foreach (string nick in clientLogic.Register(tbNick.Text, tbPort.Text)) {
                 tbRegResult.Text += nick + "\r\n";

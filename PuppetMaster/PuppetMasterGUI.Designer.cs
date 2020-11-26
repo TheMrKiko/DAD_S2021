@@ -250,7 +250,7 @@
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "PuppetMasterGUI";
             this.Text = "Puppet Master GUI";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.form1_Closing);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_Closing);
             this.ResumeLayout(false);
             this.PerformLayout();
 
