@@ -160,6 +160,13 @@ namespace PuppetMaster
             }
         }
 
+        public void Kill()
+        {
+            pcschannel = GrpcChannel.ForAddress($"http://{"localhost"}:10000");
+            pcs = new ProcessCreationService.ProcessCreationServiceClient(pcschannel);
+            pcs.Kill(new KillRequest());
+        }
+
         public void Status()
         {
             Task.WaitAll(SyncConfig(ConfigSteps.Commands));

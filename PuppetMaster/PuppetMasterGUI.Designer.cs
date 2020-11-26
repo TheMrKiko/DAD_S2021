@@ -42,6 +42,7 @@
             this.c_username = new System.Windows.Forms.TextBox();
             this.c_url = new System.Windows.Forms.TextBox();
             this.c_send = new System.Windows.Forms.Button();
+            this.kill_button = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // lbPeerList
@@ -211,11 +212,22 @@
             this.c_send.UseVisualStyleBackColor = true;
             this.c_send.Click += new System.EventHandler(this.C_send_Click);
             // 
+            // kill_button
+            // 
+            this.kill_button.Location = new System.Drawing.Point(352, 214);
+            this.kill_button.Name = "kill_button";
+            this.kill_button.Size = new System.Drawing.Size(94, 23);
+            this.kill_button.TabIndex = 13;
+            this.kill_button.Text = "Kill";
+            this.kill_button.UseVisualStyleBackColor = true;
+            this.kill_button.Click += new System.EventHandler(this.Kill_Click);
+            // 
             // PuppetMasterGUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(458, 322);
+            this.Controls.Add(this.kill_button);
             this.Controls.Add(this.c_send);
             this.Controls.Add(this.c_url);
             this.Controls.Add(this.c_username);
@@ -264,6 +276,7 @@
         private System.Windows.Forms.TextBox c_username;
         private System.Windows.Forms.TextBox c_url;
         private System.Windows.Forms.Button c_send;
+        private System.Windows.Forms.Button kill_button;
     }
 }
 

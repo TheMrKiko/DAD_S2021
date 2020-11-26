@@ -63,5 +63,10 @@ namespace PuppetMaster
         {
             puppetLogic.Client(c_username.Text, c_url.Text, c_file.Text);
         }
+
+        private void Kill_Click(object sender, EventArgs e)
+        {
+            puppetLogic.Kill();
+        }
     }
 }

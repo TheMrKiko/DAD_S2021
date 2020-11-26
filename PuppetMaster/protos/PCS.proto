@@ -3,6 +3,7 @@
 service ProcessCreationService {
   rpc CreateServer (CreateServerRequest) returns (CreateServerReply);
   rpc CreateClient (CreateClientRequest) returns (CreateClientReply);
+  rpc Kill (KillRequest) returns (KillReply);
 }
 
 message CreateServerRequest {
@@ -23,4 +24,10 @@ message CreateClientRequest {
 }
 message CreateClientReply {
 	bool ok = 1;
+}
+
+message KillRequest {
+}
+
+message KillReply {
 }
