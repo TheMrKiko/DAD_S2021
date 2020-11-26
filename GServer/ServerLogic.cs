@@ -18,8 +18,10 @@ namespace GS
         private readonly int max_d;
         private readonly string masterHostname;
 
+        private readonly Random r = new Random();
         private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
         private readonly ManualResetEventSlim manual = new ManualResetEventSlim(true);
+
         private readonly Dictionary<string, string> serverList = new Dictionary<string, string>();
         private readonly Dictionary<string, List<string>> partitionList = new Dictionary<string, List<string>>();
         private readonly Dictionary<string, Dictionary<string, string>> data = new Dictionary<string, Dictionary<string, string>>();
@@ -82,11 +84,12 @@ namespace GS
                 try
                 {
                     resp.Wait();
-                } catch (Exception)
+                }
+                catch (Exception)
                 {
                     Console.WriteLine($"Warning: Server {id} might me down.");
                     //if (ServerDown(id))
-                        serverClients.Remove(id);
+                    serverClients.Remove(id);
                 }
             }
 
@@ -111,7 +114,7 @@ namespace GS
                 {
                     Console.WriteLine($"Warning: Server {id} might me down.");
                     //if (ServerDown(id))
-                        serverClients.Remove(id);
+                    serverClients.Remove(id);
                 }
             }
 
@@ -267,6 +270,16 @@ namespace GS
             Console.WriteLine($"Servers: {serverList}");
             Console.WriteLine($"Partitions: {partitionList}");
             Console.WriteLine($"Data stored: {data}");
+        }
+
+        public void DelayMessage()
+        {
+            if (min_d != 0 && max_d != 0)
+            {
+                Console.WriteLine("Reading and parsing incoming message...");
+                Task.Delay(r.Next(min_d, max_d)).Wait();
+            }
+
         }
     }
 }

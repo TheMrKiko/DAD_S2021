@@ -18,6 +18,8 @@ namespace GS
         public override Task<CrashReply> Crash(CrashRequest request, ServerCallContext context)
         {
             Console.WriteLine();
+            clientLogic.DelayMessage();
+
             Console.WriteLine("--- Server ---");
             Console.WriteLine("Crashing...");
             clientLogic.Crash();
@@ -27,6 +29,8 @@ namespace GS
         public override Task<FreezeReply> Freeze(FreezeRequest request, ServerCallContext context)
         {
             Console.WriteLine();
+            clientLogic.DelayMessage();
+
             Console.WriteLine("--- Server ---");
             Console.WriteLine("Freezing...");
             clientLogic.Freeze();
@@ -36,6 +40,8 @@ namespace GS
         public override Task<UnfreezeReply> Unfreeze(UnfreezeRequest request, ServerCallContext context)
         {
             Console.WriteLine();
+            clientLogic.DelayMessage();
+
             Console.WriteLine("--- Server ---");
             Console.WriteLine("Unfreezing...");
             clientLogic.Unfreeze();

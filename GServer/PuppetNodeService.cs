@@ -20,6 +20,8 @@ namespace GS
         public override Task<RegisterPartitionsReply> RegisterPartitions(RegisterPartitionsRequest request, ServerCallContext context)
         {
             Console.WriteLine();
+            serverLogic.DelayMessage();
+
             Console.WriteLine("--- Server ---");
             Console.WriteLine("Master says to " + context.Method);
             Console.WriteLine("-- As in: " + request);
@@ -35,6 +37,8 @@ namespace GS
         public override Task<RegisterServersReply> RegisterServers(RegisterServersRequest request, ServerCallContext context)
         {
             Console.WriteLine();
+            serverLogic.DelayMessage();
+
             Console.WriteLine("--- Server ---");
             Console.WriteLine("Master says to " + context.Method);
             Console.WriteLine("-- As in: " + request);
@@ -50,6 +54,8 @@ namespace GS
         public override Task<StatusReply> Status(StatusRequest request, ServerCallContext context)
         {
             Console.WriteLine();
+            serverLogic.DelayMessage();
+
             Console.WriteLine("--- Server ---");
             Console.WriteLine("Master says to " + context.Method);
 
