@@ -24,6 +24,7 @@ namespace GC
 
         private Server server;
         private GrpcChannel channel;
+        private string client_id;
         private GSService.GSServiceClient client;
         private PMasterService.PMasterServiceClient pmc;
 
@@ -121,14 +122,23 @@ namespace GC
                 partitionList.TryGetValue(part_id, out List<string> servers);
                 ConnectToServer(servers[0]);
             }
-            reply = client.ReadServer(request).Object.Value;
-
-            if (reply == "N/A" && server_id != "-1")
+            try
             {
-                ConnectToServer(server_id);
                 reply = client.ReadServer(request).Object.Value;
+
+                if (reply == "N/A" && server_id != "-1")
+                {
+                    ConnectToServer(server_id);
+                    reply = client.ReadServer(request).Object.Value;
+                }
+                AddMsgtoGUI($"Read: {reply}");
             }
-            AddMsgtoGUI($"Read: {reply}");
+            catch (Exception)
+            {
+                Console.WriteLine($"Warning: Server {client_id} might me down.");
+                //if (ServerDown(id))
+                //serverClients.Remove(id);
+            }
         }
 
         public void WriteObject(string part_id, string obj_id, string new_value)
@@ -139,8 +149,18 @@ namespace GC
             partitionList.TryGetValue(part_id, out List<string> servers);
             ConnectToServer(servers[0]);
 
-            reply = client.WriteServer(request).Ok;
-            AddMsgtoGUI($"Write: {reply}");
+            try
+            {
+                reply = client.WriteServer(request).Ok;
+
+                AddMsgtoGUI($"Write: {reply}");
+            }
+            catch (Exception)
+            {
+                Console.WriteLine($"Warning: Server {client_id} might me down.");
+                //if (ServerDown(id))
+                //serverClients.Remove(id);
+            }
         }
 
         public void ListServer(string id)
@@ -209,6 +229,7 @@ namespace GC
 
             channel = GrpcChannel.ForAddress(serverList[id]);
             client = new GSService.GSServiceClient(channel);
+            client_id = id;
         }
 
         public void StorePartitions(Dictionary<string, List<string>> parts)

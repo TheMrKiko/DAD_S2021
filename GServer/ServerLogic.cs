@@ -60,29 +60,60 @@ namespace GS
             return value;
         }
 
-        public void WriteAsMaster(string objectId, string partitionId, string value)
+        public void WriteAsMaster(string objectId, string partitionId, string value, in out string cal)
         {
             CheckFreeze();
 
-            List<SHelperService.SHelperServiceClient> serverClients = new List<SHelperService.SHelperServiceClient>();
+            Dictionary<string, SHelperService.SHelperServiceClient> serverClients =
+                new Dictionary<string, SHelperService.SHelperServiceClient>();
 
             foreach (string s_id in partitionList[partitionId])
                 if (s_id != id)
-                    serverClients.Add(ConnectToServer(s_id));
+                    serverClients.Add(s_id, ConnectToServer(s_id));
 
             Console.WriteLine("Asking for locks.");
-            Task.WaitAll(serverClients.Select(cl =>
-                cl.LockDataAsync(new LockDataRequest()).ResponseAsync).ToArray()
-            );
+            List<(string id, Task<LockDataReply> lockReply)> lockReplies = serverClients.Select(sk => (
+                sk.Key,
+                sk.Value.LockDataAsync(new LockDataRequest()).ResponseAsync
+            )).ToList();
+
+            foreach ((string id, Task<LockDataReply> resp) in lockReplies)
+            {
+                try
+                {
+                    resp.Wait();
+                } catch (Exception)
+                {
+                    Console.WriteLine($"Warning: Server {id} might me down.");
+                    if (ServerDown(id))
+                        serverClients.Remove(id);
+                }
+            }
+
             Console.WriteLine("Locked. Asking to write");
-            Task.WaitAll(serverClients.Select(cl =>
-                cl.WriteDataAsync(new WriteDataRequest
+            List<(string id, Task<WriteDataReply> writeReply)> writeReply = serverClients.Select(sk => (
+                sk.Key,
+                sk.Value.WriteDataAsync(new WriteDataRequest
                 {
                     ObjectId = objectId,
                     PartitionId = partitionId,
                     NewObject = new Object { Value = value }
-                }).ResponseAsync).ToArray()
-            );
+                }).ResponseAsync
+            )).ToList();
+
+            foreach ((string id, Task<WriteDataReply> resp) in writeReply)
+            {
+                try
+                {
+                    resp.Wait();
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine($"Warning: Server {id} might me down.");
+                    //if (ServerDown(id))
+                        serverClients.Remove(id);
+                }
+            }
 
             Console.WriteLine("Unlocked and written in others.");
 
