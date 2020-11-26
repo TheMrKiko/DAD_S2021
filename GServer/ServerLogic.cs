@@ -60,7 +60,7 @@ namespace GS
             return value;
         }
 
-        public void WriteAsMaster(string objectId, string partitionId, string value, in out string cal)
+        public void WriteAsMaster(string objectId, string partitionId, string value)
         {
             CheckFreeze();
 
@@ -85,7 +85,7 @@ namespace GS
                 } catch (Exception)
                 {
                     Console.WriteLine($"Warning: Server {id} might me down.");
-                    if (ServerDown(id))
+                    //if (ServerDown(id))
                         serverClients.Remove(id);
                 }
             }
