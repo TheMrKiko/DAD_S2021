@@ -29,6 +29,7 @@ namespace GC
         private PMasterService.PMasterServiceClient pmc;
 
         private readonly Dictionary<string, string> serverList = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> partitionMaster = new Dictionary<string, string>();
         private readonly Dictionary<string, List<string>> partitionList = new Dictionary<string, List<string>>();
         private int ready = 2;
 
@@ -146,8 +147,7 @@ namespace GC
             bool reply;
             WriteServerRequest request = new WriteServerRequest { PartitionId = part_id, ObjectId = obj_id, NewObject = new Object { Value = new_value } };
 
-            partitionList.TryGetValue(part_id, out List<string> servers);
-            ConnectToServer(servers[0]);
+            ConnectToServer(partitionMaster[part_id]);
 
             try
             {
@@ -245,7 +245,10 @@ namespace GC
         {
             lock (this)
                 foreach (string p_id in parts.Keys)
+                {
                     this.partitionList[p_id] = parts[p_id];
+                    this.partitionMaster.Add(p_id, parts[p_id][0]);
+                }
             Registed();
         }
 

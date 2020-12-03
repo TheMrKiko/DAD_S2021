@@ -23,6 +23,7 @@ namespace GS
         private readonly ManualResetEventSlim manual = new ManualResetEventSlim(true);
 
         private readonly Dictionary<string, string> serverList = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> partitionMaster = new Dictionary<string, string>();
         private readonly Dictionary<string, List<string>> partitionList = new Dictionary<string, List<string>>();
         private readonly Dictionary<string, Dictionary<string, string>> data = new Dictionary<string, Dictionary<string, string>>();
 
@@ -249,7 +250,10 @@ namespace GS
 
             Lock();
             foreach (string p_id in parts.Keys)
+            {
                 this.partitionList[p_id] = parts[p_id];
+                this.partitionMaster.Add(p_id, parts[p_id][0]);
+            }
             Unlock();
         }
 
