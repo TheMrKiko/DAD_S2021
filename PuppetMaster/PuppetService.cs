@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace PuppetMaster
 {
     public class PuppetService : PMasterService.PMasterServiceBase {
-        IPuppetMasterGUI clientLogic;
+        readonly IPuppetMasterGUI clientLogic;
 
         public PuppetService(IPuppetMasterGUI clientLogic) {
             this.clientLogic = clientLogic;

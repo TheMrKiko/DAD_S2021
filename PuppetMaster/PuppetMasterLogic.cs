@@ -20,6 +20,7 @@ namespace PuppetMaster
         ReplicateFactor,
         Partition,
         Server,
+        Client,
         Commands
     }
 
@@ -37,6 +38,7 @@ namespace PuppetMaster
         //private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
 
         private int n_init_servers = 0;
+        private int n_init_clients = 0;
         private readonly Dictionary<string, List<string>> partitions = new Dictionary<string, List<string>>();
         private readonly Dictionary<string, (string url, GServerService.GServerServiceClient sc, PNodeService.PNodeServiceClient pnc)> serverMap =
             new Dictionary<string, (string, GServerService.GServerServiceClient, PNodeService.PNodeServiceClient)>();
@@ -73,7 +75,6 @@ namespace PuppetMaster
                         Partitions(int.Parse(split[1]), split[2], split.Skip(3).ToList());
                         break;
                     case "Server":
-                        configStep = ConfigSteps.Server;
                         Server(split[1], split[2], int.Parse(split[3]), int.Parse(split[4]));
                         break;
                     case "Client":
@@ -142,7 +143,7 @@ namespace PuppetMaster
 
         public void Client(string username, string url, string script_file)
         {
-            SyncConfig(ConfigSteps.Commands);
+            SyncConfig(ConfigSteps.Client);
             Uri uri = new Uri(url);
             pcschannel = GrpcChannel.ForAddress($"http://{uri.Host}:10000");
             pcs = new ProcessCreationService.ProcessCreationServiceClient(pcschannel);
@@ -156,7 +157,10 @@ namespace PuppetMaster
                 pns = new PNodeService.PNodeServiceClient(channel);
 
                 lock (this)
+                {
                     clientMap[username] = (url, gclient, pns);
+                    n_init_clients += 1;
+                }
             }
         }
 
@@ -250,6 +254,10 @@ namespace PuppetMaster
                     Console.WriteLine("Informed. Waiting acks.");
 
                     Task.WaitAll(serversReplies, partitionsReplies);
+
+                    lock (this)
+                        n_init_clients -= 1;
+
                     Console.WriteLine($"Client {id} ready.");
                     break;
                 default:
@@ -271,11 +279,12 @@ namespace PuppetMaster
                 case ConfigSteps.Partition:
                     break;
                 case ConfigSteps.Server:
+                    configStep = ConfigSteps.Server;
                     break;
-                case ConfigSteps.Commands:
+                case ConfigSteps.Client:
                     if (configStep == ConfigSteps.Server)
                     {
-                        configStep = ConfigSteps.Commands;
+                        configStep = ConfigSteps.Client;
                         while (n_init_servers != 0) { /*await Task.Delay(100);*/ }
                         Console.WriteLine("Servers alive. Informing them.");
 
@@ -308,6 +317,14 @@ namespace PuppetMaster
                         Task.WaitAll(serversReplies.ToArray());
                         Task.WaitAll(partitionsReplies.ToArray());
                         Console.WriteLine("Servers ready.");
+                    }
+                    break;
+                case ConfigSteps.Commands:
+                    if (configStep == ConfigSteps.Client)
+                    {
+                        configStep = ConfigSteps.Commands;
+                        while (n_init_clients != 0) { /*await Task.Delay(100);*/ }
+                        Console.WriteLine("Clients alive.");
                     }
                     break;
                 default:
