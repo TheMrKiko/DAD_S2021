@@ -13,7 +13,8 @@ namespace GC
             this.Text += $" {username}";
 
             clientLogic = new ClientLogic(this, username, url, masterHostname);
-            Task.Run(() => clientLogic.ExecuteCommands(file));
+            if (file != null)
+                Task.Run(() => clientLogic.ExecuteCommands(file));
         }
 
         public void PostLogtoGUI(string m)

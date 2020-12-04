@@ -15,7 +15,7 @@ namespace PuppetMaster
         static void Main(string[] args)
         {
             string host = args[0];
-            string file = args[1];
+            string file = args.Length > 1 ? args[1] : null;
 
             AllocConsole();
             Application.SetHighDpiMode(HighDpiMode.SystemAware);

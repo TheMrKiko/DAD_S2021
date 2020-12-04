@@ -3,7 +3,8 @@ using System.Windows.Forms;
 
 namespace GC
 {
-    static class Program {
+    static class Program
+    {
         [System.Runtime.InteropServices.DllImport("kernel32.dll")]
         private static extern bool AllocConsole();
 
@@ -11,11 +12,12 @@ namespace GC
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main(string[] args) {
+        static void Main(string[] args)
+        {
             string masterHostname = args[0];
             string username = args[1];
             string url = args[2];
-            string file = args[3];
+            string file = args.Length > 3 ? args[3] : null;
 
             AllocConsole();
             Application.SetHighDpiMode(HighDpiMode.SystemAware);

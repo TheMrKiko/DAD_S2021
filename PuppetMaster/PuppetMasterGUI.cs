@@ -14,7 +14,8 @@ namespace PuppetMaster
             InitializeComponent();
 
             puppetLogic = new PuppetMasterLogic(this, host, 10001);
-            Task.Run(() => puppetLogic.ExecuteCommands(filename));
+            if (filename != null)
+                Task.Run(() => puppetLogic.ExecuteCommands(filename));
         }
 
         public void AddMsgtoGUI(ConfigSteps currentConfig)
