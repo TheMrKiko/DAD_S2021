@@ -77,27 +77,7 @@ namespace GS
                 if (s_id != id)
                     serverClients.Add(s_id, ConnectToServer(s_id));
 
-            Console.WriteLine("Asking for locks.");
-            List<(string id, Task<LockDataReply> lockReply)> lockReplies = serverClients.Select(sk => (
-                sk.Key,
-                sk.Value.LockDataAsync(new LockDataRequest()).ResponseAsync
-            )).ToList();
-
-            foreach ((string id, Task<LockDataReply> resp) in lockReplies)
-            {
-                try
-                {
-                    resp.Wait();
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine($"Warning: Server {id} might me down.");
-                    //if (ServerDown(id))
-                    serverClients.Remove(id);
-                }
-            }
-
-            Console.WriteLine("Locked. Asking to write");
+            Console.WriteLine("Asking to write");
             List<(string id, Task<WriteDataReply> writeReply)> writeReply = serverClients.Select(sk => (
                 sk.Key,
                 sk.Value.WriteDataAsync(new WriteDataRequest
@@ -109,7 +89,7 @@ namespace GS
                 }).ResponseAsync
             )).ToList();
 
-            foreach ((string id, Task<WriteDataReply> resp) in writeReply)
+            /*foreach ((string id, Task<WriteDataReply> resp) in writeReply)
             {
                 try
                 {
@@ -121,13 +101,11 @@ namespace GS
                     //if (ServerDown(id))
                     serverClients.Remove(id);
                 }
-            }
+            }*/
 
-            Console.WriteLine("Unlocked and written in others.");
+            Console.WriteLine("Sent to others.");
 
-            Lock();
             Write(objectId, partitionId, value, version);
-            Unlock();
 
             return version;
         }
@@ -138,11 +116,13 @@ namespace GS
 
             Console.WriteLine("Starting to actually write...");
 
+            Lock();
             Dictionary<string, string> newPart =
                 data.ContainsKey(partitionId) ? data[partitionId].val : new Dictionary<string, string>();
             newPart.Add(objectId, newObj);
 
             data[partitionId] = (version, newPart);
+            Unlock();
 
             Console.WriteLine("Partition " + partitionId + " and id " + objectId + ", now I have " + newObj + " (version " + version + ")");
 
