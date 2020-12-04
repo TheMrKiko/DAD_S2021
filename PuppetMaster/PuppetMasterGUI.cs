@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace PuppetMaster
 {
-    public partial class PuppetMasterGUI : System.Windows.Forms.Form
+    public partial class PuppetMasterGUI : Form
     {
         readonly PuppetMasterLogic puppetLogic;
         public PuppetMasterGUI(string filename, string host)

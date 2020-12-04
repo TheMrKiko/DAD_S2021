@@ -4,36 +4,35 @@ using System.Windows.Forms;
 
 namespace GC
 {
-    public partial class ClientGUI : Form {
+    public partial class ClientGUI : Form
+    {
         readonly ClientLogic clientLogic;
-        public ClientGUI(string username, string url, string file, string masterHostname) {
+        public ClientGUI(string username, string url, string file, string masterHostname)
+        {
             InitializeComponent();
-            this.Text += " " + username;
+            this.Text += $" {username}";
 
             clientLogic = new ClientLogic(this, username, url, masterHostname);
             Task.Run(() => clientLogic.ExecuteCommands(file));
         }
 
-        public void PostLogtoGUI(string m) { logs.Text = m + "\r\n" + logs.Text; }
+        public void PostLogtoGUI(string m)
+        {
+            logs.Text = $"{m}\r\n{logs.Text}";
+        }
 
-        private void Form1_Closing(object sender, FormClosingEventArgs e) {
+        private void Form1_Closing(object sender, FormClosingEventArgs e)
+        {
             clientLogic.ServerShutdown();
         }
 
-        private void BtRead_Click(object sender, EventArgs e) {
-            //string m = newvalue.Text;
-
-            //await clientLogic.BcastMsg(m);
-            /*tbConv.Text += "me: " + tbMsg.Text + "\r\n";
-            tbMsg.Text = "";*/
+        private void BtRead_Click(object sender, EventArgs e)
+        {
             clientLogic.ReadObject(pid.Text, objid.Text, serverid.Text);
         }
 
         private void BtWrite_Click(object sender, EventArgs e)
         {
-            /*foreach (string nick in clientLogic.Register(tbNick.Text, tbPort.Text)) {
-                tbRegResult.Text += nick + "\r\n";
-            }*/
             clientLogic.WriteObject(pid.Text, objid.Text, newvalue.Text);
         }
     }

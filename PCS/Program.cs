@@ -22,7 +22,7 @@ namespace PCS
             server.Start();
 
             Console.WriteLine("Insecure PCS server listening on port " + port);
-            
+
             //Configuring HTTP for client connections in Register method
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             while (true) ;

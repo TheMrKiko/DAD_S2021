@@ -35,8 +35,6 @@ namespace GC
         private readonly Dictionary<string, (int vers, Dictionary<string, string> val)> data = new Dictionary<string, (int vers, Dictionary<string, string> val)>();
         private int ready = 2;
 
-        //private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
-
         public ClientLogic(ClientGUI guiWindow, string username, string url, string masterHostname)
         {
             this.guiWindow = guiWindow;
@@ -281,7 +279,7 @@ namespace GC
             // setup the client service
             server = new Server
             {
-                Services = { GCService.BindService(new GClientService(this)), PNodeService.BindService(new PuppetNodeService(this)) },
+                Services = { PNodeService.BindService(new PuppetNodeService(this)) },
                 Ports = { new ServerPort(hostname, port, ServerCredentials.Insecure) }
             };
 
@@ -374,38 +372,5 @@ namespace GC
         {
             server.ShutdownAsync().Wait();
         }
-
-        /*public List<string> Register(string username, string port) {
-            this.username = username;
-            // setup the client service
-            server = new Server
-            {
-                Services = { ChatClientService.BindService(new GClientService(this)) },
-                Ports = { new ServerPort(hostname, Int32.Parse(port), ServerCredentials.Insecure) }
-            };
-            server.Start();
-            ChatClientRegisterReply reply = client.Register(new ChatClientRegisterRequest
-            {
-                Nick = username,
-                Url = "http://localhost:" + port
-            }) ;
-            
-            List<string> result = new List<string>();
-            foreach (User u in reply.Users) {
-                result.Add(u.Nick);
-            }
-            return result;
-        }
-
-        public async Task BcastMsg(string m) {
-            BcastMsgReply reply;
-            if (lastMsgCall != null) {
-                reply = await lastMsgCall.ResponseAsync;          
-            }
-            lastMsgCall = client.BcastMsgAsync(new BcastMsgRequest { 
-                Nick = this.username,
-                Msg = m
-            });
-        }*/
     }
 }

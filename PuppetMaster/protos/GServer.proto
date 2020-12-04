@@ -1,4 +1,0 @@
-﻿syntax = "proto3";
-
-service GServerService {
-}

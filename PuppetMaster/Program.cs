@@ -3,7 +3,8 @@ using System.Windows.Forms;
 
 namespace PuppetMaster
 {
-    static class Program {
+    static class Program
+    {
         [System.Runtime.InteropServices.DllImport("kernel32.dll")]
         private static extern bool AllocConsole();
 
@@ -22,7 +23,7 @@ namespace PuppetMaster
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new PuppetMasterGUI(file, host));
 
-            while(true);
+            while (true) ;
         }
     }
 }

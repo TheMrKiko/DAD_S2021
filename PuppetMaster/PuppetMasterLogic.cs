@@ -34,18 +34,16 @@ namespace PuppetMaster
         private ConfigSteps configStep;
         private Server server;
         private GrpcChannel channel, pcschannel;
-        private GServerService.GServerServiceClient gserver; private GCService.GCServiceClient gclient;
         private PNodeService.PNodeServiceClient pns; private ProcessCreationService.ProcessCreationServiceClient pcs;
         RegisterPartitionsRequest partitionsRequest; RegisterServersRequest serversRequest;
-        //private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
 
         private int n_init_servers = 0;
         private int n_init_clients = 0;
         private readonly Dictionary<string, List<string>> partitions = new Dictionary<string, List<string>>();
-        private readonly Dictionary<string, (string url, GServerService.GServerServiceClient sc, PNodeService.PNodeServiceClient pnc)> serverMap =
-            new Dictionary<string, (string, GServerService.GServerServiceClient, PNodeService.PNodeServiceClient)>();
-        private readonly Dictionary<string, (string url, GCService.GCServiceClient sc, PNodeService.PNodeServiceClient pnc)> clientMap =
-            new Dictionary<string, (string, GCService.GCServiceClient, PNodeService.PNodeServiceClient)>();
+        private readonly Dictionary<string, (string url, PNodeService.PNodeServiceClient pnc)> serverMap =
+            new Dictionary<string, (string, PNodeService.PNodeServiceClient)>();
+        private readonly Dictionary<string, (string url, PNodeService.PNodeServiceClient pnc)> clientMap =
+            new Dictionary<string, (string, PNodeService.PNodeServiceClient)>();
 
         public PuppetMasterLogic(PuppetMasterGUI guiWindow, string masterHostname, int masterPort)
         {
@@ -129,18 +127,15 @@ namespace PuppetMaster
             if (reply.Ok)
             {
                 channel = GrpcChannel.ForAddress(url);
-                gserver = new GServerService.GServerServiceClient(channel);
                 pns = new PNodeService.PNodeServiceClient(channel);
 
                 lock (this)
                 {
-                    serverMap[id] = (url, gserver, pns);
+                    serverMap[id] = (url, pns);
                     n_init_servers += 1;
                 }
 
             }
-            //Console.WriteLine($"Registered server {request.Nick} with URL {request.Url}");
-
         }
 
         public void Client(string username, string url, string script_file)
@@ -155,12 +150,11 @@ namespace PuppetMaster
             if (reply.Ok)
             {
                 channel = GrpcChannel.ForAddress(url);
-                gclient = new GCService.GCServiceClient(channel);
                 pns = new PNodeService.PNodeServiceClient(channel);
 
                 lock (this)
                 {
-                    clientMap[username] = (url, gclient, pns);
+                    clientMap[username] = (url, pns);
                     n_init_clients += 1;
                 }
             }
@@ -342,49 +336,10 @@ namespace PuppetMaster
             }
         }
 
-
         public bool SyncConfigInGUI(ConfigSteps s)
         {
             this.guiWindow.BeginInvoke(new DelSyncConfig(guiWindow.AddMsgtoGUI), new object[] { s });
             return true;
         }
-
-        /*public List<string> Register(string nick, string port)
-        {
-            this.nick = nick;
-            // setup the client service
-            server = new Server
-            {
-                Services = { ChatClientService.BindService(new ClientService(this)) },
-                Ports = { new ServerPort(hostname, Int32.Parse(port), ServerCredentials.Insecure) }
-            };
-            server.Start();
-            ChatClientRegisterReply reply = client.Register(new ChatClientRegisterRequest
-            {
-                Nick = nick,
-                Url = "http://localhost:" + port
-            });
-
-            List<string> result = new List<string>();
-            foreach (User u in reply.Users)
-            {
-                result.Add(u.Nick);
-            }
-            return result;
-        }
-
-        public async Task BcastMsg(string m)
-        {
-            BcastMsgReply reply;
-            if (lastMsgCall != null)
-            {
-                reply = await lastMsgCall.ResponseAsync;
-            }
-            lastMsgCall = client.BcastMsgAsync(new BcastMsgRequest
-            {
-                Nick = this.nick,
-                Msg = m
-            });
-        }*/
     }
 }

@@ -51,53 +51,6 @@ namespace GC
             this.clientLogic.Status();
             return Task.FromResult(new StatusReply());
         }
-
-
-
-
-
-        /*public BcastMsgReply Bcast(BcastMsgRequest request) {
-            // random wait to simulate slow msg broadcast: Thread.Sleep(5000);
-            Console.WriteLine("msg arrived. lazy server waiting for server admin to press key.");
-            Console.ReadKey();
-            lock (this) {
-                foreach (string nick in clientMap.Keys) {
-                    if (nick != request.Nick) {
-                        try {
-                            clientMap[nick].RecvMsg(new RecvMsgRequest
-                            {
-                                Msg = request.Nick + ": " + request.Msg 
-                            });
-                        } catch (Exception e) {
-                            Console.WriteLine(e.Message);
-                            clientMap.Remove(nick);
-                        }
-                    }
-                }
-            }
-            Console.WriteLine($"Broadcast message {request.Msg} from {request.Nick}");
-            return new BcastMsgReply
-            {
-                Ok = true
-            };
-        }
-
-        public ChatClientRegisterReply Reg(ChatClientRegisterRequest request) {
-                channel = GrpcChannel.ForAddress(request.Url);
-                ChatClientService.ChatClientServiceClient client =
-                    new ChatClientService.ChatClientServiceClient(channel);
-            lock (this) {
-                clientMap.Add(request.Nick, client);
-            }
-            Console.WriteLine($"Registered client {request.Nick} with URL {request.Url}");
-            ChatClientRegisterReply reply = new ChatClientRegisterReply();
-            lock (this) {
-                foreach (string nick in clientMap.Keys) {
-                    reply.Users.Add(new User { Nick = nick });
-                }
-            }
-            return reply;
-        }*/
     }
 }
 
