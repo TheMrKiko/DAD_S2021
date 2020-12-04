@@ -31,6 +31,7 @@ namespace GC
         private readonly Dictionary<string, string> serverList = new Dictionary<string, string>();
         private readonly Dictionary<string, string> partitionMaster = new Dictionary<string, string>();
         private readonly Dictionary<string, List<string>> partitionList = new Dictionary<string, List<string>>();
+        private readonly Dictionary<string, (int vers, Dictionary<string, string> val)> data = new Dictionary<string, (int vers, Dictionary<string, string> val)>();
         private int ready = 2;
 
         //private AsyncUnaryCall<BcastMsgReply> lastMsgCall;
@@ -116,23 +117,40 @@ namespace GC
 
         public void ReadObject(string part_id, string obj_id, string server_id)
         {
-            string reply;
+            ReadServerReply reply;
             ReadServerRequest request = new ReadServerRequest { PartitionId = part_id, ObjectId = obj_id };
             if (client == null)
             {
-                partitionList.TryGetValue(part_id, out List<string> servers);
-                ConnectToServer(servers[0]);
+                string next_serv = server_id != "-1" ? server_id : partitionMaster[part_id];
+                ConnectToServer(next_serv);
             }
             try
             {
-                reply = client.ReadServer(request).Object.Value;
+                reply = client.ReadServer(request);
+                (string val, int version) = (reply.Object.Value, reply.Version);
 
-                if (reply == "N/A" && server_id != "-1")
+                if (val == "N/A" && server_id != "-1")
                 {
                     ConnectToServer(server_id);
-                    reply = client.ReadServer(request).Object.Value;
+                    reply = client.ReadServer(request);
+                    (val, version) = (reply.Object.Value, reply.Version);
                 }
-                AddMsgtoGUI($"Read: {reply}");
+                int local_v; string value;
+
+                lock (this)
+                {
+                    local_v = data.ContainsKey(part_id) ? data[part_id].vers : -1;
+                    value = local_v < version ? val : data[part_id].val[obj_id];
+
+                    Dictionary<string, string> newPart =
+                        data.ContainsKey(part_id) ? data[part_id].val : new Dictionary<string, string>();
+                    newPart.Add(obj_id, value);
+
+                    if (local_v < version)
+                        data[part_id] = (version, newPart);
+                }
+
+                AddMsgtoGUI($"Read: {value}");
             }
             catch (Exception)
             {
@@ -144,14 +162,23 @@ namespace GC
 
         public void WriteObject(string part_id, string obj_id, string new_value)
         {
-            bool reply;
+            int reply;
             WriteServerRequest request = new WriteServerRequest { PartitionId = part_id, ObjectId = obj_id, NewObject = new Object { Value = new_value } };
 
             ConnectToServer(partitionMaster[part_id]);
 
             try
             {
-                reply = client.WriteServer(request).Ok;
+                reply = client.WriteServer(request).Version;
+
+                lock (this)
+                {
+                    Dictionary<string, string> newPart =
+                        data.ContainsKey(part_id) ? data[part_id].val : new Dictionary<string, string>();
+                    newPart.Add(obj_id, new_value);
+
+                    this.data[part_id] = (reply, newPart);
+                }
 
                 AddMsgtoGUI($"Write: {reply}");
             }

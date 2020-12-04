@@ -48,15 +48,15 @@ namespace GS
 
         private ReadServerReply Read(ReadServerRequest request)
         {
-            (string val, int vers) value = clientLogic.Read(request.ObjectId, request.PartitionId);
+            (string val, int vers) = clientLogic.Read(request.ObjectId, request.PartitionId);
 
-            return new ReadServerReply { Object = new Object { Value = value.val } };
+            return new ReadServerReply { Object = new Object { Value = val }, Version = vers };
         }
 
         private WriteServerReply Write(WriteServerRequest request)
         {
-            clientLogic.WriteAsMaster(request.ObjectId, request.PartitionId, request.NewObject.Value);
-            return new WriteServerReply { Ok = true };
+            int version = clientLogic.WriteAsMaster(request.ObjectId, request.PartitionId, request.NewObject.Value);
+            return new WriteServerReply { Version = version };
         }
 
         /*public BcastMsgReply Bcast(BcastMsgRequest request) {

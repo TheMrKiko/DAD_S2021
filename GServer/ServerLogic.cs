@@ -64,7 +64,7 @@ namespace GS
             return (value, version);
         }
 
-        public void WriteAsMaster(string objectId, string partitionId, string value)
+        public int WriteAsMaster(string objectId, string partitionId, string value)
         {
             CheckFreeze();
 
@@ -128,6 +128,8 @@ namespace GS
             Lock();
             Write(objectId, partitionId, value, version);
             Unlock();
+
+            return version;
         }
 
         public void Write(string objectId, string partitionId, string newObj, int version)
