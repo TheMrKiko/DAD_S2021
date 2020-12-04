@@ -1,8 +1,9 @@
 {
   "profiles": {
     "PuppetMaster": {
-      "commandName": "Project",
-      "commandLineArgs": "localhost pm_script1.txt"
+        "commandName": "Project",
+        "commandLineArgs": "localhost pm_script1"
+        //"commandLineArgs": "localhost sample_pm_script.txt"
     }
   }
 }
