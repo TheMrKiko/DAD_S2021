@@ -34,18 +34,12 @@ namespace PuppetMaster
                     p_send.Enabled = false;
                     p_serverids.Enabled = false;
                     break;
-                case ConfigSteps.Client:
+                case ConfigSteps.Commands:
                     s_id.Enabled = false;
                     s_min.Enabled = false;
                     s_max.Enabled = false;
                     s_url.Enabled = false;
                     s_send.Enabled = false;
-                    break;
-                case ConfigSteps.Commands:
-                    c_url.Enabled = false;
-                    c_file.Enabled = false;
-                    c_send.Enabled = false;
-                    c_username.Enabled = false;
                     break;
                 default:
                     break;

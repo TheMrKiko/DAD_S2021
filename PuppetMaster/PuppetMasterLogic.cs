@@ -15,7 +15,6 @@ namespace PuppetMaster
         ReplicateFactor,
         Partition,
         Server,
-        Client,
         Commands
     }
 
@@ -140,7 +139,7 @@ namespace PuppetMaster
 
         public void Client(string username, string url, string script_file)
         {
-            SyncConfig(ConfigSteps.Client);
+            SyncConfig(ConfigSteps.Commands);
             Uri uri = new Uri(url);
             pcschannel = GrpcChannel.ForAddress($"http://{uri.Host}:10000");
             pcs = new ProcessCreationService.ProcessCreationServiceClient(pcschannel);
@@ -201,7 +200,11 @@ namespace PuppetMaster
             SyncConfig(ConfigSteps.Commands);
 
             PServerService.PServerServiceClient client = new PServerService.PServerServiceClient(GrpcChannel.ForAddress(serverMap[id].url));
-            client.Freeze(new FreezeRequest());
+            try
+            {
+                client.Freeze(new FreezeRequest());
+            }
+            catch (Exception) { }
         }
 
         public void Unfreeze(string id)
@@ -209,7 +212,11 @@ namespace PuppetMaster
             SyncConfig(ConfigSteps.Commands);
 
             PServerService.PServerServiceClient client = new PServerService.PServerServiceClient(GrpcChannel.ForAddress(serverMap[id].url));
-            client.Unfreeze(new UnfreezeRequest());
+            try
+            {
+                client.Unfreeze(new UnfreezeRequest());
+            }
+            catch (Exception) { }
         }
 
         public void Crash(string id)
@@ -217,7 +224,11 @@ namespace PuppetMaster
             SyncConfig(ConfigSteps.Commands);
 
             PServerService.PServerServiceClient client = new PServerService.PServerServiceClient(GrpcChannel.ForAddress(serverMap[id].url));
-            client.Crash(new CrashRequest());
+            try
+            {
+                client.Crash(new CrashRequest());
+            }
+            catch (Exception) { }
         }
 
         private void StartPMServer(string serverHostname, int serverPort)
@@ -285,10 +296,9 @@ namespace PuppetMaster
                 case ConfigSteps.Server:
                     configStep = ConfigSteps.Server;
                     break;
-                case ConfigSteps.Client:
+                case ConfigSteps.Commands:
                     if (configStep == ConfigSteps.Server)
                     {
-                        configStep = ConfigSteps.Client;
                         while (n_init_servers != 0) { /*await Task.Delay(100);*/ }
                         Console.WriteLine("Servers alive. Informing them.");
 
@@ -322,14 +332,13 @@ namespace PuppetMaster
                         Task.WaitAll(partitionsReplies.ToArray());
                         Console.WriteLine("Servers ready.");
                     }
-                    break;
-                case ConfigSteps.Commands:
-                    if (configStep == ConfigSteps.Client)
+
+                    else if (configStep == ConfigSteps.Commands)
                     {
-                        configStep = ConfigSteps.Commands;
                         while (n_init_clients != 0) { /*await Task.Delay(100);*/ }
                         Console.WriteLine("Clients alive.");
                     }
+                    configStep = ConfigSteps.Commands;
                     break;
                 default:
                     break;

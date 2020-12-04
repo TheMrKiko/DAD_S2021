@@ -178,7 +178,7 @@ namespace GS
             {
                 server.KillAsync();
                 Console.WriteLine("Dead.");
-            });
+            }).Wait(1000);
 
             Freeze();
 
