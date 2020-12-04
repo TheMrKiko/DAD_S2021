@@ -184,7 +184,12 @@ namespace PuppetMaster
                     nodeReplies.Add(clientMap[c_id].pnc.StatusAsync(request).ResponseAsync);
             }
 
-            Task.WaitAll(nodeReplies.ToArray());
+            foreach (Task<StatusReply> node in nodeReplies)
+                try
+                {
+                    node.Wait();
+                }
+                catch (Exception) { };
 
             Console.WriteLine("Told nodes to status themselves.");
         }
