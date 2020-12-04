@@ -5,13 +5,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-public delegate void DelAddMsg(string s);
+public delegate void DelPostLog(string s);
 
 namespace GC
 {
     public interface IClientGUI
     {
-        bool AddMsgtoGUI(string s);
+        bool PostLogtoGUI(string s);
     }
     public class ClientLogic : IClientGUI
     {
@@ -120,7 +120,7 @@ namespace GC
         {
             ReadServerReply reply = null;
             ReadServerRequest request = new ReadServerRequest { PartitionId = part_id, ObjectId = obj_id };
-            AddMsgtoGUI($"<Read> {part_id} (v{(data.ContainsKey(part_id) ? data[part_id].vers : -1)}) {obj_id}");
+            PostLogtoGUI($"<Read> {part_id} (v{(data.ContainsKey(part_id) ? data[part_id].vers : -1)}) {obj_id}");
 
             Queue<string> server_pos = new Queue<string>();
             server_pos.Enqueue(server_id);
@@ -178,7 +178,7 @@ namespace GC
                 data[part_id] = (version, newPart);
             }
 
-            AddMsgtoGUI($"> Read '{value}' (v{version}).");
+            PostLogtoGUI($"> Read '{value}' (v{version}).");
             Console.WriteLine($"Value returned is '{value}' (v {version}).");
         }
 
@@ -187,7 +187,7 @@ namespace GC
             WriteServerReply reply = null;
             WriteServerRequest request = new WriteServerRequest { PartitionId = part_id, ObjectId = obj_id, NewObject = new Object { Value = new_value } };
 
-            AddMsgtoGUI($"<Write> {part_id} (v{(data.ContainsKey(part_id) ? data[part_id].vers : -1)}) {obj_id} '{new_value}'");
+            PostLogtoGUI($"<Write> {part_id} (v{(data.ContainsKey(part_id) ? data[part_id].vers : -1)}) {obj_id} '{new_value}'");
 
             Queue<string> server_pos = new Queue<string>();
             server_pos.Enqueue(partitionMaster[part_id]);
@@ -245,7 +245,7 @@ namespace GC
                 data[part_id] = (read_vers, newPart);
             }
 
-            AddMsgtoGUI($"> Written in {next_serv} (v{read_vers}).");
+            PostLogtoGUI($"> Written in {next_serv} (v{read_vers}).");
             Console.WriteLine($"Value returned is ok from {next_serv} (v {read_vers}).");
         }
 
@@ -364,9 +364,9 @@ namespace GC
             Console.WriteLine($"Warning: Server {server_id} might me down.");
         }
 
-        public bool AddMsgtoGUI(string s)
+        public bool PostLogtoGUI(string s)
         {
-            this.guiWindow.BeginInvoke(new DelAddMsg(guiWindow.AddMsgtoGUI), new object[] { s });
+            this.guiWindow.BeginInvoke(new DelPostLog(guiWindow.PostLogtoGUI), new object[] { s });
             return true;
         }
 

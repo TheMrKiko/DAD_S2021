@@ -5,17 +5,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-public delegate void DelAddMsg(string s);
 
 namespace PuppetMaster
 {
-    public interface IPuppetMasterGUI
-    {
-        //bool AddMsgtoGUI(string s);
-        void Register(string id, NodeType type);
-    }
+    public delegate void DelSyncConfig(ConfigSteps config);
 
-    enum ConfigSteps
+    public enum ConfigSteps
     {
         ReplicateFactor,
         Partition,
@@ -24,9 +19,16 @@ namespace PuppetMaster
         Commands
     }
 
+    public interface IPuppetMasterGUI
+    {
+        bool SyncConfigInGUI(ConfigSteps config);
+        void Register(string id, NodeType type);
+    }
+
+
     public class PuppetMasterLogic : IPuppetMasterGUI
     {
-        //private readonly PuppetMasterGUI guiWindow;
+        private readonly PuppetMasterGUI guiWindow;
         private readonly string masterHostname;
 
         private ConfigSteps configStep;
@@ -45,10 +47,10 @@ namespace PuppetMaster
         private readonly Dictionary<string, (string url, GCService.GCServiceClient sc, PNodeService.PNodeServiceClient pnc)> clientMap =
             new Dictionary<string, (string, GCService.GCServiceClient, PNodeService.PNodeServiceClient)>();
 
-        public PuppetMasterLogic(PuppetMasterGUI _, string masterHostname, int masterPort)
+        public PuppetMasterLogic(PuppetMasterGUI guiWindow, string masterHostname, int masterPort)
         {
             this.masterHostname = masterHostname;
-            //this.guiWindow = guiWindow;
+            this.guiWindow = guiWindow;
 
             StartPMServer(masterHostname, masterPort);
         }
@@ -67,11 +69,9 @@ namespace PuppetMaster
                 switch (split[0])
                 {
                     case "ReplicationFactor":
-                        configStep = ConfigSteps.ReplicateFactor;
                         ReplicationFactor(int.Parse(split[1]));
                         break;
                     case "Partition":
-                        configStep = ConfigSteps.Partition;
                         Partitions(int.Parse(split[1]), split[2], split.Skip(3).ToList());
                         break;
                     case "Server":
@@ -106,11 +106,13 @@ namespace PuppetMaster
 
         public void ReplicationFactor(int _)
         {
+            SyncConfig(ConfigSteps.ReplicateFactor);
             return;
         }
 
         public void Partitions(int _, string id, List<string> serverids)
         {
+            SyncConfig(ConfigSteps.Partition);
             lock (this)
                 partitions[id] = serverids;
         }
@@ -277,11 +279,14 @@ namespace PuppetMaster
 
         private void SyncConfig(ConfigSteps config)
         {
+            SyncConfigInGUI(config);
             switch (config)
             {
                 case ConfigSteps.ReplicateFactor:
+                    configStep = ConfigSteps.ReplicateFactor;
                     break;
                 case ConfigSteps.Partition:
+                    configStep = ConfigSteps.Partition;
                     break;
                 case ConfigSteps.Server:
                     configStep = ConfigSteps.Server;
@@ -338,13 +343,13 @@ namespace PuppetMaster
         }
 
 
-        /*public bool AddMsgtoGUI(string s)
+        public bool SyncConfigInGUI(ConfigSteps s)
         {
-            this.guiWindow.BeginInvoke(new DelAddMsg(guiWindow.AddMsgtoGUI), new object[] { s });
+            this.guiWindow.BeginInvoke(new DelSyncConfig(guiWindow.AddMsgtoGUI), new object[] { s });
             return true;
         }
 
-        public List<string> Register(string nick, string port)
+        /*public List<string> Register(string nick, string port)
         {
             this.nick = nick;
             // setup the client service

@@ -6,36 +6,54 @@ using System.Windows.Forms;
 
 namespace PuppetMaster
 {
-    public partial class PuppetMasterGUI : Form {
+    public partial class PuppetMasterGUI : System.Windows.Forms.Form
+    {
         readonly PuppetMasterLogic puppetLogic;
-        public PuppetMasterGUI(string filename, string host) {
+        public PuppetMasterGUI(string filename, string host)
+        {
             InitializeComponent();
-            
+
             puppetLogic = new PuppetMasterLogic(this, host, 10001);
             Task.Run(() => puppetLogic.ExecuteCommands(filename));
         }
 
-        private void BtReg_Click(object sender, EventArgs e) {
-            /*foreach (string nick in puppetLogic.Register(tbNick.Text, tbPort.Text)) {
-                tbRegResult.Text += nick + "\r\n";
+        public void AddMsgtoGUI(ConfigSteps currentConfig)
+        {
+            switch (currentConfig)
+            {
+                case ConfigSteps.ReplicateFactor:
+                    break;
+                case ConfigSteps.Partition:
+                    r_r.Enabled = false;
+                    r_send.Enabled = false;
+                    break;
+                case ConfigSteps.Server:
+                    p_n.Enabled = false;
+                    p_id.Enabled = false;
+                    p_send.Enabled = false;
+                    p_serverids.Enabled = false;
+                    break;
+                case ConfigSteps.Client:
+                    s_id.Enabled = false;
+                    s_min.Enabled = false;
+                    s_max.Enabled = false;
+                    s_url.Enabled = false;
+                    s_send.Enabled = false;
+                    break;
+                case ConfigSteps.Commands:
+                    c_url.Enabled = false;
+                    c_file.Enabled = false;
+                    c_send.Enabled = false;
+                    c_username.Enabled = false;
+                    break;
+                default:
+                    break;
             }
-            tbNick.Enabled = false;
-            tbPort.Enabled = false;*/
         }
 
-        public void AddMsgtoGUI(string _) {
-            //tbConv.Text += m + "\r\n"; 
-        }
-
-        private void Form1_Closing(object sender, FormClosingEventArgs e) {
+        private void Form1_Closing(object sender, FormClosingEventArgs e)
+        {
             puppetLogic.ServerShutdown();
-        }
-
-        private void BtSend_Click(object sender, EventArgs e) {
-            /*string m = tbMsg.Text;
-            await puppetLogic.BcastMsg(m);
-            tbConv.Text += "me: " + tbMsg.Text + "\r\n";
-            tbMsg.Text = "";*/
         }
 
         private void R_send_Click(object sender, EventArgs e)
@@ -67,6 +85,26 @@ namespace PuppetMaster
         private void Kill_Click(object sender, EventArgs e)
         {
             puppetLogic.Kill();
+        }
+
+        private void Freeze_Click(object sender, EventArgs e)
+        {
+            puppetLogic.Freeze(ct_id.Text);
+        }
+
+        private void Crash_Click(object sender, EventArgs e)
+        {
+            puppetLogic.Crash(ct_id.Text);
+        }
+
+        private void Unfreeze_Click(object sender, EventArgs e)
+        {
+            puppetLogic.Unfreeze(ct_id.Text);
+        }
+
+        private void Status_Click(object sender, EventArgs e)
+        {
+            puppetLogic.Status();
         }
     }
 }

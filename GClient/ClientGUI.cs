@@ -8,12 +8,13 @@ namespace GC
         readonly ClientLogic clientLogic;
         public ClientGUI(string username, string url, string file, string masterHostname) {
             InitializeComponent();
+            this.Text += " " + username;
 
             clientLogic = new ClientLogic(this, username, url, masterHostname);
             Task.Run(() => clientLogic.ExecuteCommands(file));
         }
 
-        public void AddMsgtoGUI(string m) { logs.Text = m + "\r\n" + logs.Text; }
+        public void PostLogtoGUI(string m) { logs.Text = m + "\r\n" + logs.Text; }
 
         private void Form1_Closing(object sender, FormClosingEventArgs e) {
             clientLogic.ServerShutdown();

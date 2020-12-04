@@ -43,6 +43,12 @@
             this.c_url = new System.Windows.Forms.TextBox();
             this.c_send = new System.Windows.Forms.Button();
             this.kill_button = new System.Windows.Forms.Button();
+            this.status_button = new System.Windows.Forms.Button();
+            this.ct_id = new System.Windows.Forms.TextBox();
+            this.ct_freeze = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.ct_crash = new System.Windows.Forms.Button();
+            this.ct_unfreeze = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // lbPeerList
@@ -214,7 +220,7 @@
             // 
             // kill_button
             // 
-            this.kill_button.Location = new System.Drawing.Point(352, 214);
+            this.kill_button.Location = new System.Drawing.Point(352, 287);
             this.kill_button.Name = "kill_button";
             this.kill_button.Size = new System.Drawing.Size(94, 23);
             this.kill_button.TabIndex = 13;
@@ -222,11 +228,74 @@
             this.kill_button.UseVisualStyleBackColor = true;
             this.kill_button.Click += new System.EventHandler(this.Kill_Click);
             // 
+            // status_button
+            // 
+            this.status_button.Location = new System.Drawing.Point(246, 287);
+            this.status_button.Name = "status_button";
+            this.status_button.Size = new System.Drawing.Size(94, 23);
+            this.status_button.TabIndex = 14;
+            this.status_button.Text = "Status";
+            this.status_button.UseVisualStyleBackColor = true;
+            this.status_button.Click += new System.EventHandler(this.Status_Click);
+            // 
+            // ct_id
+            // 
+            this.ct_id.Location = new System.Drawing.Point(12, 223);
+            this.ct_id.Name = "ct_id";
+            this.ct_id.PlaceholderText = "Server ID";
+            this.ct_id.Size = new System.Drawing.Size(64, 23);
+            this.ct_id.TabIndex = 15;
+            // 
+            // ct_freeze
+            // 
+            this.ct_freeze.Location = new System.Drawing.Point(82, 223);
+            this.ct_freeze.Name = "ct_freeze";
+            this.ct_freeze.Size = new System.Drawing.Size(78, 23);
+            this.ct_freeze.TabIndex = 17;
+            this.ct_freeze.Text = "Freeze";
+            this.ct_freeze.UseVisualStyleBackColor = true;
+            this.ct_freeze.Click += new System.EventHandler(this.Freeze_Click);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(12, 205);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(47, 15);
+            this.label3.TabIndex = 19;
+            this.label3.Text = "Control";
+            // 
+            // ct_crash
+            // 
+            this.ct_crash.Location = new System.Drawing.Point(166, 223);
+            this.ct_crash.Name = "ct_crash";
+            this.ct_crash.Size = new System.Drawing.Size(78, 23);
+            this.ct_crash.TabIndex = 20;
+            this.ct_crash.Text = "Crash";
+            this.ct_crash.UseVisualStyleBackColor = true;
+            this.ct_crash.Click += new System.EventHandler(this.Crash_Click);
+            // 
+            // ct_unfreeze
+            // 
+            this.ct_unfreeze.Location = new System.Drawing.Point(82, 252);
+            this.ct_unfreeze.Name = "ct_unfreeze";
+            this.ct_unfreeze.Size = new System.Drawing.Size(78, 23);
+            this.ct_unfreeze.TabIndex = 21;
+            this.ct_unfreeze.Text = "Unfreeze";
+            this.ct_unfreeze.UseVisualStyleBackColor = true;
+            this.ct_unfreeze.Click += new System.EventHandler(this.Unfreeze_Click);
+            // 
             // PuppetMasterGUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(458, 322);
+            this.Controls.Add(this.ct_unfreeze);
+            this.Controls.Add(this.ct_crash);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.ct_freeze);
+            this.Controls.Add(this.ct_id);
+            this.Controls.Add(this.status_button);
             this.Controls.Add(this.kill_button);
             this.Controls.Add(this.c_send);
             this.Controls.Add(this.c_url);
@@ -277,6 +346,12 @@
         private System.Windows.Forms.TextBox c_url;
         private System.Windows.Forms.Button c_send;
         private System.Windows.Forms.Button kill_button;
+        private System.Windows.Forms.Button status_button;
+        private System.Windows.Forms.TextBox ct_id;
+        private System.Windows.Forms.Button ct_freeze;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button ct_crash;
+        private System.Windows.Forms.Button ct_unfreeze;
     }
 }
 
