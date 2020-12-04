@@ -103,7 +103,7 @@ namespace GC
                         switch (split[0])
                         {
                             case "end-repeat":
-                                foreach (int j in Enumerable.Range(0, times))
+                                foreach (int j in Enumerable.Range(1, times))
                                     ParseLines(commands, j.ToString());
                                 repeat = false;
                                 break;
