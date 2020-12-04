@@ -48,9 +48,9 @@ namespace GS
 
         private ReadServerReply Read(ReadServerRequest request)
         {
-            string value = clientLogic.Read(request.ObjectId, request.PartitionId);
+            (string val, int vers) value = clientLogic.Read(request.ObjectId, request.PartitionId);
 
-            return new ReadServerReply { Object = new Object { Value = value } };
+            return new ReadServerReply { Object = new Object { Value = value.val } };
         }
 
         private WriteServerReply Write(WriteServerRequest request)

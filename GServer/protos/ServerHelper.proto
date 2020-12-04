@@ -13,6 +13,7 @@ message WriteDataRequest {
   string partition_id = 1;
   string object_id = 2;
   Object new_object = 3;
+  int32 version = 4;
 }
 message WriteDataReply {
   bool ok = 1;

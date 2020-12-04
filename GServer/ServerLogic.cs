@@ -25,7 +25,7 @@ namespace GS
         private readonly Dictionary<string, string> serverList = new Dictionary<string, string>();
         private readonly Dictionary<string, string> partitionMaster = new Dictionary<string, string>();
         private readonly Dictionary<string, List<string>> partitionList = new Dictionary<string, List<string>>();
-        private readonly Dictionary<string, Dictionary<string, string>> data = new Dictionary<string, Dictionary<string, string>>();
+        private readonly Dictionary<string, (int vers, Dictionary<string, string> val)> data = new Dictionary<string, (int vers, Dictionary<string, string> val)>();
 
         private Server server;
         private GrpcChannel channel;
@@ -45,7 +45,7 @@ namespace GS
             RegisterInMaster();
         }
 
-        public string Read(string objectId, string partitionId)
+        public (string, int) Read(string objectId, string partitionId)
         {
             CheckFreeze();
 
@@ -53,14 +53,15 @@ namespace GS
 
             Lock();
             if (!data.ContainsKey(partitionId))
-                data[partitionId] = new Dictionary<string, string>();
+                data[partitionId] = (0, new Dictionary<string, string>());
 
-            if (!data[partitionId].TryGetValue(objectId, out string value))
+            int version = data[partitionId].vers;
+            if (!data[partitionId].val.TryGetValue(objectId, out string value))
                 value = "N/A";
             Unlock();
 
-            Console.WriteLine("For partition " + partitionId + " and id " + objectId + ", i have " + value);
-            return value;
+            Console.WriteLine("For partition " + partitionId + " and id " + objectId + ", i have " + value + " (version " + version + ")");
+            return (value, version);
         }
 
         public void WriteAsMaster(string objectId, string partitionId, string value)
@@ -69,6 +70,8 @@ namespace GS
 
             Dictionary<string, SHelperService.SHelperServiceClient> serverClients =
                 new Dictionary<string, SHelperService.SHelperServiceClient>();
+
+            int version = data.ContainsKey(partitionId) ? data[partitionId].vers + 1 : 0;
 
             foreach (string s_id in partitionList[partitionId])
                 if (s_id != id)
@@ -101,7 +104,8 @@ namespace GS
                 {
                     ObjectId = objectId,
                     PartitionId = partitionId,
-                    NewObject = new Object { Value = value }
+                    NewObject = new Object { Value = value },
+                    Version = version
                 }).ResponseAsync
             )).ToList();
 
@@ -122,19 +126,21 @@ namespace GS
             Console.WriteLine("Unlocked and written in others.");
 
             Lock();
-            Write(objectId, partitionId, value);
+            Write(objectId, partitionId, value, version);
             Unlock();
         }
 
-        public void Write(string objectId, string partitionId, string newObj)
+        public void Write(string objectId, string partitionId, string newObj, int version)
         {
             CheckFreeze();
 
             Console.WriteLine("Starting to actually write...");
-            if (!data.ContainsKey(partitionId))
-                data[partitionId] = new Dictionary<string, string>();
 
-            data[partitionId].Add(objectId, newObj);
+            Dictionary<string, string> newPart =
+                data.ContainsKey(partitionId) ? data[partitionId].val : new Dictionary<string, string>();
+            newPart.Add(objectId, newObj);
+
+            data[partitionId] = (version, newPart);
 
             Console.WriteLine("Done.");
         }
@@ -145,7 +151,7 @@ namespace GS
 
             List<(string id, bool master)> list = new List<(string id, bool master)>();
             foreach (string p in data.Keys)
-                foreach (string obj_id in data[p].Keys)
+                foreach (string obj_id in data[p].val.Keys)
                     list.Add((obj_id, partitionList[p][0] == id));
             return list;
         }

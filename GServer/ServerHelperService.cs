@@ -33,7 +33,7 @@ namespace GS
 
             Console.WriteLine("--- Server ---");
             Console.WriteLine("Writing...");
-            clientLogic.Write(request.ObjectId, request.PartitionId, request.NewObject.Value);
+            clientLogic.Write(request.ObjectId, request.PartitionId, request.NewObject.Value, request.Version);
             clientLogic.Unlock(true);
             return Task.FromResult(new WriteDataReply { Ok = true });
         }
