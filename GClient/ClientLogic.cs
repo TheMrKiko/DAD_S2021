@@ -28,6 +28,7 @@ namespace GC
         private GSService.GSServiceClient client;
         private PMasterService.PMasterServiceClient pmc;
 
+        private readonly HashSet<string> deadServers = new HashSet<string>();
         private readonly Dictionary<string, string> serverList = new Dictionary<string, string>();
         private readonly Dictionary<string, string> partitionMaster = new Dictionary<string, string>();
         private readonly Dictionary<string, List<string>> partitionList = new Dictionary<string, List<string>>();
@@ -125,7 +126,6 @@ namespace GC
             server_pos.Enqueue(server_id);
 
             foreach (string s_id in partitionList[part_id])
-                //if (s_id.notindead)
                 server_pos.Enqueue(s_id);
 
             while (reply == null && server_pos.Count() != 0)
@@ -136,7 +136,8 @@ namespace GC
                     if (next_serv == "-1")
                         continue;
 
-                    ConnectToServer(next_serv);
+                    if (!ConnectToServer(next_serv))
+                        continue;
                 }
 
                 try
@@ -146,9 +147,8 @@ namespace GC
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine($"Warning: Server {client_id} might me down.");
                     client = null;
-                    //if (ServerDown(id))
+                    ServerDown(client_id);
                 }
             }
 
@@ -193,7 +193,6 @@ namespace GC
             server_pos.Enqueue(partitionMaster[part_id]);
 
             foreach (string s_id in partitionList[part_id])
-                //if (s_id.notindead)
                 server_pos.Enqueue(s_id);
 
             string next_serv = "";
@@ -203,7 +202,8 @@ namespace GC
                 if (next_serv == "-1")
                     continue;
 
-                ConnectToServer(next_serv);
+                if (!ConnectToServer(next_serv))
+                    continue;
 
                 try
                 {
@@ -212,9 +212,8 @@ namespace GC
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine($"Warning: Server {next_serv} might me down.");
                     client = null;
-                    //if (ServerDown(id))
+                    ServerDown(next_serv);
                 }
             }
 
@@ -259,9 +258,7 @@ namespace GC
             }
             catch (Exception)
             {
-                Console.WriteLine($"Warning: Server {id} might me down.");
-                //if (ServerDown(id))
-                //serverClients.Remove(id);
+                ServerDown(id);
             }
         }
 
@@ -309,9 +306,15 @@ namespace GC
                 this.ready -= 1;
         }
 
-        public void ConnectToServer(string id)
+        public bool ConnectToServer(string id)
         {
-            Console.WriteLine("Will connect to server " + id);
+            Console.WriteLine($"Will connect to server {id}");
+
+            if (deadServers.Contains(id))
+            {
+                Console.WriteLine($"Server {id} is reportedly dead.");
+                return false;
+            }
 
             // setup the client side
             if (channel != null)
@@ -320,6 +323,7 @@ namespace GC
             channel = GrpcChannel.ForAddress(serverList[id]);
             client = new GSService.GSServiceClient(channel);
             client_id = id;
+            return true;
         }
 
         public void StorePartitions(Dictionary<string, List<string>> parts)
@@ -349,6 +353,12 @@ namespace GC
             Console.WriteLine($"> Partitions:");
             foreach (string p_id in partitionList.Keys)
                 Console.WriteLine($"> Partition {p_id} ({string.Join(", ", partitionMaster[p_id])}) is in {string.Join(", ", partitionList[p_id])}");
+        }
+        public void ServerDown(string server_id)
+        {
+            lock (this)
+                deadServers.Add(server_id);
+            Console.WriteLine($"Warning: Server {server_id} might me down.");
         }
 
         public bool AddMsgtoGUI(string s)
