@@ -349,13 +349,13 @@ namespace GC
 
         public void Status()
         {
-            Console.WriteLine($"> Servers:");
+            Console.WriteLine($"> Servers");
             Console.WriteLine($"> {string.Join(", ", serverList.Keys)}");
-            Console.WriteLine($"> Dead: {string.Join(", ", deadServers)}");
+            Console.WriteLine($"> Dead {string.Join(", ", deadServers)}");
 
-            Console.WriteLine($"> Partitions:");
+            Console.WriteLine($"> Partitions");
             foreach (string p_id in partitionList.Keys)
-                Console.WriteLine($"> Partition {p_id} ({string.Join(", ", partitionMaster[p_id])}) is in {string.Join(", ", partitionList[p_id])}");
+                Console.WriteLine($"> Partition {p_id} ({partitionMaster[p_id]}) is in {string.Join(", ", partitionList[p_id])}");
         }
         public void ServerDown(string server_id)
         {

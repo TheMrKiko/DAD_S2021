@@ -138,7 +138,7 @@ namespace GS
             Lock();
             Dictionary<string, string> newPart =
                 data.ContainsKey(partitionId) ? data[partitionId].val : new Dictionary<string, string>();
-            newPart.Add(objectId, newObj);
+            newPart[objectId] = newObj;
 
             data[partitionId] = (version, newPart);
             Unlock();
@@ -290,12 +290,12 @@ namespace GS
         {
             CheckFreeze();
 
-            Console.WriteLine($"> Servers:");
+            Console.WriteLine($"> Servers");
             Console.WriteLine($"> {string.Join(", ", serverList.Keys)}");
 
-            Console.WriteLine($"> Partitions:");
+            Console.WriteLine($"> Partitions");
             foreach (string p_id in partitionList.Keys)
-                Console.WriteLine($"> Partition {p_id} ({string.Join(", ", partitionMaster[p_id])}) is in {string.Join(", ", partitionList[p_id])}");
+                Console.WriteLine($"> Partition {p_id} ({partitionMaster[p_id]}) is in {string.Join(", ", partitionList[p_id])}");
 
         }
 
