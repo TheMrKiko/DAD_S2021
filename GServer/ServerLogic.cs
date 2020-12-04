@@ -144,6 +144,8 @@ namespace GS
 
             data[partitionId] = (version, newPart);
 
+            Console.WriteLine("Partition " + partitionId + " and id " + objectId + ", now I have " + newObj + " (version " + version + ")");
+
             Console.WriteLine("Done.");
         }
 
@@ -206,8 +208,6 @@ namespace GS
 
         public void RegisterInMaster()
         {
-            Console.WriteLine();
-            Console.WriteLine("--- Server ---");
             Console.WriteLine("Master, i'm ready for you!");
             Console.WriteLine("Waiting for some info on the network");
 
@@ -218,8 +218,6 @@ namespace GS
 
         public SHelperService.SHelperServiceClient ConnectToServer(string id)
         {
-            Console.WriteLine();
-            Console.WriteLine("--- Server ---");
             Console.WriteLine("Will connect to server " + id);
 
             channel = GrpcChannel.ForAddress(serverList[id]);
@@ -279,16 +277,20 @@ namespace GS
         {
             CheckFreeze();
 
-            Console.WriteLine($"Servers: {serverList}");
-            Console.WriteLine($"Partitions: {partitionList}");
-            Console.WriteLine($"Data stored: {data}");
+            Console.WriteLine($"> Servers:");
+            Console.WriteLine($"> {string.Join(", ", serverList.Keys)}");
+
+            Console.WriteLine($"> Partitions:");
+            foreach (string p_id in partitionList.Keys)
+                Console.WriteLine($"> Partition {p_id} ({string.Join(", ", partitionMaster[p_id])}) is in {string.Join(", ", partitionList[p_id])}");
+
         }
 
         public void DelayMessage()
         {
             if (min_d != 0 && max_d != 0)
             {
-                Console.WriteLine("Reading and parsing incoming message...");
+                Console.WriteLine("(reading and parsing incoming message)");
                 Task.Delay(r.Next(min_d, max_d)).Wait();
             }
 

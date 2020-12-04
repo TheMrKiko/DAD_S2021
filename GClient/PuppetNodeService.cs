@@ -20,9 +20,7 @@ namespace GC
         public override Task<RegisterPartitionsReply> RegisterPartitions(RegisterPartitionsRequest request, ServerCallContext context)
         {
             Console.WriteLine();
-            Console.WriteLine("--- Client ---");
-            Console.WriteLine("Master says to " + context.Method);
-            Console.WriteLine("-- As in: " + request);
+            Console.WriteLine($"<Master> RegisterPartitions {request.Info}");
 
             Dictionary<string, List<string>> parts = new Dictionary<string, List<string>>();
             foreach (PartitionInfo partition in request.Info)
@@ -35,9 +33,7 @@ namespace GC
         public override Task<RegisterServersReply> RegisterServers(RegisterServersRequest request, ServerCallContext context)
         {
             Console.WriteLine();
-            Console.WriteLine("--- Client ---");
-            Console.WriteLine("Master says to " + context.Method);
-            Console.WriteLine("-- As in: " + request);
+            Console.WriteLine($"<Master> RegisterServers {request.Info}");
 
             Dictionary<string, string> servers = new Dictionary<string, string>();
             foreach (ServerInfo server in request.Info)
@@ -50,8 +46,7 @@ namespace GC
         public override Task<StatusReply> Status(StatusRequest request, ServerCallContext context)
         {
             Console.WriteLine();
-            Console.WriteLine("--- CLient ---");
-            Console.WriteLine("Master says to " + context.Method);
+            Console.WriteLine($"<Master> Status");
 
             this.clientLogic.Status();
             return Task.FromResult(new StatusReply());

@@ -1,10 +1,10 @@
 ﻿namespace GC
 {
     public class GClientService : GCService.GCServiceBase {
-        private readonly IClientGUI clientLogic;
+        //private readonly IClientGUI clientLogic;
 
         public GClientService(IClientGUI clientLogic) {
-            this.clientLogic = clientLogic;
+            //this.clientLogic = clientLogic;
         }
 
         /*public Task<RecvMsgReply> RecvMsg(

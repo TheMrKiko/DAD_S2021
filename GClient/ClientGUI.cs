@@ -13,7 +13,7 @@ namespace GC
             Task.Run(() => clientLogic.ExecuteCommands(file));
         }
 
-        public void AddMsgtoGUI(string m) { logs.Text += m + "\r\n"; }
+        public void AddMsgtoGUI(string m) { logs.Text = m + "\r\n" + logs.Text; }
 
         private void Form1_Closing(object sender, FormClosingEventArgs e) {
             clientLogic.ServerShutdown();

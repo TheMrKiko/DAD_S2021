@@ -124,6 +124,9 @@ namespace GC
                 string next_serv = server_id != "-1" ? server_id : partitionMaster[part_id];
                 ConnectToServer(next_serv);
             }
+
+            AddMsgtoGUI($"<Read> {part_id} (v{(data.ContainsKey(part_id) ? data[part_id].vers : -1)}) {obj_id}");
+
             try
             {
                 reply = client.ReadServer(request);
@@ -150,7 +153,7 @@ namespace GC
                         data[part_id] = (version, newPart);
                 }
 
-                AddMsgtoGUI($"Read: {value}");
+                AddMsgtoGUI($"> Read '{val}' (v{version}).");
             }
             catch (Exception)
             {
@@ -167,6 +170,8 @@ namespace GC
 
             ConnectToServer(partitionMaster[part_id]);
 
+            AddMsgtoGUI($"<Write> {part_id} (v{(data.ContainsKey(part_id) ? data[part_id].vers : -1)}) {obj_id} '{new_value}'");
+
             try
             {
                 reply = client.WriteServer(request).Version;
@@ -180,10 +185,11 @@ namespace GC
                     this.data[part_id] = (reply, newPart);
                 }
 
-                AddMsgtoGUI($"Write: {reply}");
+                AddMsgtoGUI($"> Written in {partitionMaster[part_id]} (v{reply}).");
             }
             catch (Exception)
             {
+                AddMsgtoGUI($"Fail!");
                 Console.WriteLine($"Warning: Server {client_id} might me down.");
                 //if (ServerDown(id))
                 //serverClients.Remove(id);
@@ -194,10 +200,10 @@ namespace GC
         {
             try
             {
-                Console.WriteLine("-- Info for server " + id + " --");
+                Console.WriteLine("Info for server " + id);
                 GSService.GSServiceClient client = new GSService.GSServiceClient(GrpcChannel.ForAddress(serverList[id]));
                 foreach (ObjectInfo objectInfo in client.ListServer(new ListServerRequest()).ObjInfo)
-                    Console.WriteLine("Id: " + objectInfo.Id + " (is master: " + objectInfo.Master + ")");
+                    Console.WriteLine($"> Obj: {objectInfo.Id} {(objectInfo.Master ? "is master" : "")}");
             }
             catch (Exception)
             {
@@ -237,8 +243,6 @@ namespace GC
 
         public void RegisterInMaster()
         {
-            Console.WriteLine();
-            Console.WriteLine("--- Client ---");
             Console.WriteLine("Master, i'm ready for you!");
             Console.WriteLine("Waiting for some info on the network");
 
@@ -255,8 +259,6 @@ namespace GC
 
         public void ConnectToServer(string id)
         {
-            Console.WriteLine();
-            Console.WriteLine("--- Client ---");
             Console.WriteLine("Will switch to server " + id);
 
             // setup the client side
@@ -289,8 +291,12 @@ namespace GC
 
         public void Status()
         {
-            Console.WriteLine($"Servers: {serverList}");
-            Console.WriteLine($"Partitions: {partitionList}");
+            Console.WriteLine($"> Servers:");
+            Console.WriteLine($"> {string.Join(", ", serverList.Keys)}");
+
+            Console.WriteLine($"> Partitions:");
+            foreach (string p_id in partitionList.Keys)
+                Console.WriteLine($"> Partition {p_id} ({string.Join(", ", partitionMaster[p_id])}) is in {string.Join(", ", partitionList[p_id])}");
         }
 
         public bool AddMsgtoGUI(string s)

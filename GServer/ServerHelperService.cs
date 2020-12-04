@@ -17,10 +17,10 @@ namespace GS
 
         public override Task<LockDataReply> LockData(LockDataRequest request, ServerCallContext context)
         {
-            Console.WriteLine();
             clientLogic.DelayMessage();
+            Console.WriteLine();
 
-            Console.WriteLine("--- Server ---");
+            Console.WriteLine($"<Server> LockData");
             Console.WriteLine("Locking...");
             clientLogic.Lock(true);
             return Task.FromResult(new LockDataReply());
@@ -28,10 +28,10 @@ namespace GS
 
         public override Task<WriteDataReply> WriteData(WriteDataRequest request, ServerCallContext context)
         {
-            Console.WriteLine();
             clientLogic.DelayMessage();
+            Console.WriteLine();
 
-            Console.WriteLine("--- Server ---");
+            Console.WriteLine($"<Server> WriteData {request.PartitionId} {request.ObjectId} {request.NewObject} {request.Version}");
             Console.WriteLine("Writing...");
             clientLogic.Write(request.ObjectId, request.PartitionId, request.NewObject.Value, request.Version);
             clientLogic.Unlock(true);

@@ -21,24 +21,21 @@ namespace PCS
         public override Task<CreateClientReply> CreateClient(CreateClientRequest request, ServerCallContext context)
         {
             Console.WriteLine();
-            Console.WriteLine("--- PCS ---");
-            Console.WriteLine("Master ordered to " + context.Method);
+            Console.WriteLine($"<Master> CreateClient {request.Username}");
             return Task.FromResult(NewClient(request));
         }
 
         public override Task<CreateServerReply> CreateServer(CreateServerRequest request, ServerCallContext context)
         {
             Console.WriteLine();
-            Console.WriteLine("--- PCS ---");
-            Console.WriteLine("Master ordered to " + context.Method);
+            Console.WriteLine($"<Master> CreateServer {request.Id}");
             return Task.FromResult(NewServer(request));
         }
 
         public override Task<KillReply> Kill(KillRequest request, ServerCallContext context)
         {
             Console.WriteLine();
-            Console.WriteLine("--- PCS ---");
-            Console.WriteLine("Master ordered to " + context.Method);
+            Console.WriteLine($"<Master> Kill");
             return Task.FromResult(KillNodes(request));
         }
 

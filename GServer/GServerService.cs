@@ -19,30 +19,27 @@ namespace GS
         public override Task<ReadServerReply> ReadServer(ReadServerRequest request, ServerCallContext context)
         {
             Console.WriteLine();
-            Console.WriteLine("--- Server ---");
-            Console.WriteLine("A client is " + context.Method);
-            Console.WriteLine("-- As in: " + request);
+            Console.WriteLine($"<Client> Read p_id: {request.PartitionId} obj_id: {request.ObjectId}");
             return Task.FromResult(Read(request));
         }
 
         public override Task<WriteServerReply> WriteServer(WriteServerRequest request, ServerCallContext context)
         {
             Console.WriteLine();
-            Console.WriteLine("--- Server ---");
-            Console.WriteLine("A client is " + context.Method);
-            Console.WriteLine("-- As in: " + request);
+            Console.WriteLine($"<Client> Write p_id: {request.PartitionId} obj_id: {request.ObjectId} obj: {request.NewObject}");
             return Task.FromResult(Write(request));
         }
 
         public override Task<ListServerReply> ListServer(ListServerRequest request, ServerCallContext context)
         {
             Console.WriteLine();
-            Console.WriteLine("--- Server ---");
-            Console.WriteLine("A client is " + context.Method);
+            Console.WriteLine($"<Client> List");
             ListServerReply reply = new ListServerReply();
             List<(string, bool)> list = clientLogic.List();
             foreach ((string id, bool master) in list)
                 reply.ObjInfo.Add(new ObjectInfo { Id = id, Master = master });
+
+            Console.WriteLine($"Listed.");
             return Task.FromResult(reply);
         }
 
