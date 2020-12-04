@@ -31,6 +31,7 @@
             this.lbConv = new System.Windows.Forms.Label();
             this.readbt = new System.Windows.Forms.Button();
             this.serverid = new System.Windows.Forms.TextBox();
+            this.listbt = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // pid
@@ -39,16 +40,16 @@
             this.pid.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pid.Name = "pid";
             this.pid.PlaceholderText = "Partition ID";
-            this.pid.Size = new System.Drawing.Size(120, 23);
+            this.pid.Size = new System.Drawing.Size(87, 23);
             this.pid.TabIndex = 1;
             // 
             // objid
             // 
-            this.objid.Location = new System.Drawing.Point(215, 20);
+            this.objid.Location = new System.Drawing.Point(182, 20);
             this.objid.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.objid.Name = "objid";
             this.objid.PlaceholderText = "Object ID";
-            this.objid.Size = new System.Drawing.Size(95, 23);
+            this.objid.Size = new System.Drawing.Size(87, 23);
             this.objid.TabIndex = 2;
             // 
             // logs
@@ -64,10 +65,10 @@
             // 
             // btwrite
             // 
-            this.btwrite.Location = new System.Drawing.Point(10, 55);
+            this.btwrite.Location = new System.Drawing.Point(10, 53);
             this.btwrite.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btwrite.Name = "btwrite";
-            this.btwrite.Size = new System.Drawing.Size(74, 22);
+            this.btwrite.Size = new System.Drawing.Size(74, 24);
             this.btwrite.TabIndex = 5;
             this.btwrite.Text = "Write";
             this.btwrite.UseVisualStyleBackColor = true;
@@ -93,10 +94,10 @@
             // 
             // readbt
             // 
-            this.readbt.Location = new System.Drawing.Point(10, 20);
+            this.readbt.Location = new System.Drawing.Point(10, 19);
             this.readbt.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.readbt.Name = "readbt";
-            this.readbt.Size = new System.Drawing.Size(74, 22);
+            this.readbt.Size = new System.Drawing.Size(74, 24);
             this.readbt.TabIndex = 5;
             this.readbt.Text = "Read";
             this.readbt.UseVisualStyleBackColor = true;
@@ -104,18 +105,30 @@
             // 
             // serverid
             // 
-            this.serverid.Location = new System.Drawing.Point(351, 19);
+            this.serverid.Location = new System.Drawing.Point(291, 20);
             this.serverid.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.serverid.Name = "serverid";
             this.serverid.PlaceholderText = "Server ID (op)";
-            this.serverid.Size = new System.Drawing.Size(95, 23);
+            this.serverid.Size = new System.Drawing.Size(79, 23);
             this.serverid.TabIndex = 2;
+            // 
+            // listbt
+            // 
+            this.listbt.Location = new System.Drawing.Point(376, 19);
+            this.listbt.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.listbt.Name = "listbt";
+            this.listbt.Size = new System.Drawing.Size(70, 24);
+            this.listbt.TabIndex = 11;
+            this.listbt.Text = "List";
+            this.listbt.UseVisualStyleBackColor = true;
+            this.listbt.Click += new System.EventHandler(this.Listbt_Click);
             // 
             // ClientGUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(458, 322);
+            this.ClientSize = new System.Drawing.Size(458, 351);
+            this.Controls.Add(this.listbt);
             this.Controls.Add(this.serverid);
             this.Controls.Add(this.readbt);
             this.Controls.Add(this.lbConv);
@@ -142,6 +155,7 @@
         private System.Windows.Forms.Label lbConv;
         private System.Windows.Forms.Button readbt;
         private System.Windows.Forms.TextBox serverid;
+        private System.Windows.Forms.Button listbt;
     }
 }
 

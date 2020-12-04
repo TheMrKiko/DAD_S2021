@@ -35,5 +35,13 @@ namespace GC
         {
             clientLogic.WriteObject(pid.Text, objid.Text, newvalue.Text);
         }
+
+        private void Listbt_Click(object sender, EventArgs e)
+        {
+            if (pid.Text.Length == 0)
+                clientLogic.ListGlobal();
+            else
+                clientLogic.ListServer(pid.Text);
+        }
     }
 }
