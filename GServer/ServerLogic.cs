@@ -202,6 +202,8 @@ namespace GS
                 Console.WriteLine("Dead.");
             });
 
+            Freeze();
+
             //System.Diagnostics.Process process = System.Diagnostics.Process.GetCurrentProcess();
             //process.CloseMainWindow();
         }

@@ -19,6 +19,7 @@ namespace GS
         {
             clientLogic.DelayMessage();
             Console.WriteLine();
+
             Console.WriteLine($"<Server> AnnounceMaster {request.ServerId} {request.PartitionId}");
             clientLogic.AnnounceMaster(request.ServerId, request.PartitionId);
             return Task.FromResult(new AnnounceMasterReply());
@@ -29,7 +30,7 @@ namespace GS
             clientLogic.DelayMessage();
             Console.WriteLine();
 
-            Console.WriteLine($"<Server> WriteData {request.PartitionId} {request.ObjectId} {request.NewObject} {request.Version}");
+            Console.WriteLine($"<Server> WriteData {request.PartitionId} {request.ObjectId} {request.NewObject.Value} {request.Version}");
             Console.WriteLine("Writing...");
             clientLogic.Write(request.ObjectId, request.PartitionId, request.NewObject.Value, request.Version);
             return Task.FromResult(new WriteDataReply { Ok = true });
