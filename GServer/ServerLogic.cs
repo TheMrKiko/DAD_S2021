@@ -23,6 +23,7 @@ namespace GS
         private readonly ManualResetEventSlim manual = new ManualResetEventSlim(true);
 
         private readonly Dictionary<string, string> serverList = new Dictionary<string, string>();
+
         private readonly Dictionary<string, string> partitionMaster = new Dictionary<string, string>();
         private readonly Dictionary<string, List<string>> partitionList = new Dictionary<string, List<string>>();
         private readonly Dictionary<string, (int vers, Dictionary<string, string> val)> data = new Dictionary<string, (int vers, Dictionary<string, string> val)>();
@@ -64,50 +65,89 @@ namespace GS
             return (value, version);
         }
 
-        public int WriteAsMaster(string objectId, string partitionId, string value)
+        public (string, int) WriteAsMaster(string objectId, string partitionId, string value)
         {
             CheckFreeze();
 
-            Dictionary<string, SHelperService.SHelperServiceClient> serverClients =
-                new Dictionary<string, SHelperService.SHelperServiceClient>();
+            Lock();
+            string masterPartId = partitionMaster[partitionId];
+            Unlock();
 
-            int version = data.ContainsKey(partitionId) ? data[partitionId].vers + 1 : 0;
-
-            foreach (string s_id in partitionList[partitionId])
-                if (s_id != id)
-                    serverClients.Add(s_id, ConnectToServer(s_id));
-
-            Console.WriteLine("Asking to write");
-            List<(string id, Task<WriteDataReply> writeReply)> writeReply = serverClients.Select(sk => (
-                sk.Key,
-                sk.Value.WriteDataAsync(new WriteDataRequest
-                {
-                    ObjectId = objectId,
-                    PartitionId = partitionId,
-                    NewObject = new Object { Value = value },
-                    Version = version
-                }).ResponseAsync
-            )).ToList();
-
-            /*foreach ((string id, Task<WriteDataReply> resp) in writeReply)
+            if (masterPartId != id)
             {
+                SHelperService.SHelperServiceClient partMaster = ConnectToServer(masterPartId);
                 try
                 {
-                    resp.Wait();
+                    partMaster.AnnounceMaster(new AnnounceMasterRequest
+                    {
+                        PartitionId = partitionId,
+                        ServerId = masterPartId
+                    });
+
+                    return (masterPartId, -1);
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine($"Warning: Server {id} might me down.");
-                    //if (ServerDown(id))
-                    serverClients.Remove(id);
+                    Console.WriteLine($"Server {masterPartId} is down. Gonna go for master.");
+
+                    foreach (string s_id in partitionList[partitionId])
+                        if (s_id != id)
+                            ConnectToServer(s_id).AnnounceMasterAsync(new AnnounceMasterRequest
+                            {
+                                PartitionId = partitionId,
+                                ServerId = id
+                            });
+                    Lock();
+                    partitionMaster[partitionId] = id;
+                    Unlock();
+
+                    return WriteAsMaster(objectId, partitionId, value);
                 }
-            }*/
+            }
+            else
+            {
 
-            Console.WriteLine("Sent to others.");
+                Dictionary<string, SHelperService.SHelperServiceClient> serverClients =
+                    new Dictionary<string, SHelperService.SHelperServiceClient>();
 
-            Write(objectId, partitionId, value, version);
+                int version = data.ContainsKey(partitionId) ? data[partitionId].vers + 1 : 0;
 
-            return version;
+                foreach (string s_id in partitionList[partitionId])
+                    if (s_id != id)
+                        serverClients.Add(s_id, ConnectToServer(s_id));
+
+                Console.WriteLine("Asking to write");
+                List<(string id, Task<WriteDataReply> writeReply)> writeReply = serverClients.Select(sk => (
+                    sk.Key,
+                    sk.Value.WriteDataAsync(new WriteDataRequest
+                    {
+                        ObjectId = objectId,
+                        PartitionId = partitionId,
+                        NewObject = new Object { Value = value },
+                        Version = version
+                    }).ResponseAsync
+                )).ToList();
+
+                /*foreach ((string id, Task<WriteDataReply> resp) in writeReply)
+                {
+                    try
+                    {
+                        resp.Wait();
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine($"Warning: Server {id} might me down.");
+                        //if (ServerDown(id))
+                        serverClients.Remove(id);
+                    }
+                }*/
+
+                Console.WriteLine("Sent to others.");
+
+                Write(objectId, partitionId, value, version);
+
+                return (id, version);
+            }
         }
 
         public void Write(string objectId, string partitionId, string newObj, int version)
@@ -127,6 +167,18 @@ namespace GS
             Console.WriteLine("Partition " + partitionId + " and id " + objectId + ", now I have " + newObj + " (version " + version + ")");
 
             Console.WriteLine("Done.");
+        }
+
+        public void AnnounceMaster(string serverId, string partitionId)
+        {
+            CheckFreeze();
+
+            Lock();
+            partitionMaster[partitionId] = serverId;
+            Unlock();
+
+            Console.WriteLine($"Master to {partitionId} is now {serverId}.");
+
         }
 
         public List<(string id, bool master)> List()

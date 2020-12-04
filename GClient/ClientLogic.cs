@@ -165,7 +165,7 @@ namespace GC
 
         public void WriteObject(string part_id, string obj_id, string new_value)
         {
-            int reply;
+            int new_ver;
             WriteServerRequest request = new WriteServerRequest { PartitionId = part_id, ObjectId = obj_id, NewObject = new Object { Value = new_value } };
 
             ConnectToServer(partitionMaster[part_id]);
@@ -174,7 +174,7 @@ namespace GC
 
             try
             {
-                reply = client.WriteServer(request).Version;
+                new_ver = client.WriteServer(request).Version;
 
                 lock (this)
                 {
@@ -182,10 +182,10 @@ namespace GC
                         data.ContainsKey(part_id) ? data[part_id].val : new Dictionary<string, string>();
                     newPart.Add(obj_id, new_value);
 
-                    this.data[part_id] = (reply, newPart);
+                    this.data[part_id] = (new_ver, newPart);
                 }
 
-                AddMsgtoGUI($"> Written in {partitionMaster[part_id]} (v{reply}).");
+                AddMsgtoGUI($"> Written in {partitionMaster[part_id]} (v{new_ver}).");
             }
             catch (Exception)
             {

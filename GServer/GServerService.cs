@@ -52,8 +52,8 @@ namespace GS
 
         private WriteServerReply Write(WriteServerRequest request)
         {
-            int version = clientLogic.WriteAsMaster(request.ObjectId, request.PartitionId, request.NewObject.Value);
-            return new WriteServerReply { Version = version };
+            (string master, int version) = clientLogic.WriteAsMaster(request.ObjectId, request.PartitionId, request.NewObject.Value);
+            return new WriteServerReply { Version = version, MasterId = master };
         }
 
         /*public BcastMsgReply Bcast(BcastMsgRequest request) {

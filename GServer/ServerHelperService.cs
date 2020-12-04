@@ -15,14 +15,13 @@ namespace GS
             this.clientLogic = clientLogic;
         }
 
-        public override Task<LockDataReply> LockData(LockDataRequest request, ServerCallContext context)
+        public override Task<AnnounceMasterReply> AnnounceMaster(AnnounceMasterRequest request, ServerCallContext context)
         {
             clientLogic.DelayMessage();
             Console.WriteLine();
-            //BLANK
-            Console.WriteLine($"<Server> LockData");
-            Console.WriteLine("Locking...");
-            return Task.FromResult(new LockDataReply());
+            Console.WriteLine($"<Server> AnnounceMaster {request.ServerId} {request.PartitionId}");
+            clientLogic.AnnounceMaster(request.ServerId, request.PartitionId);
+            return Task.FromResult(new AnnounceMasterReply());
         }
 
         public override Task<WriteDataReply> WriteData(WriteDataRequest request, ServerCallContext context)

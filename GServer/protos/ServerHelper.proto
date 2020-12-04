@@ -2,12 +2,15 @@
 import "protos/GServer.proto";
 
 service SHelperService {
-  rpc LockData (LockDataRequest) returns (LockDataReply);
+  rpc AnnounceMaster (AnnounceMasterRequest) returns (AnnounceMasterReply);
   rpc WriteData (WriteDataRequest) returns (WriteDataReply);
 }
-message LockDataRequest { 
+message AnnounceMasterRequest { 
+  string server_id = 1;
+  string partition_id = 2;
 }
-message LockDataReply {
+message AnnounceMasterReply {
+  bool ok = 1;
 }
 message WriteDataRequest {
   string partition_id = 1;
