@@ -117,83 +117,135 @@ namespace GC
 
         public void ReadObject(string part_id, string obj_id, string server_id)
         {
-            ReadServerReply reply;
+            ReadServerReply reply = null;
             ReadServerRequest request = new ReadServerRequest { PartitionId = part_id, ObjectId = obj_id };
-            if (client == null)
-            {
-                string next_serv = server_id != "-1" ? server_id : partitionMaster[part_id];
-                ConnectToServer(next_serv);
-            }
-
             AddMsgtoGUI($"<Read> {part_id} (v{(data.ContainsKey(part_id) ? data[part_id].vers : -1)}) {obj_id}");
 
-            try
-            {
-                reply = client.ReadServer(request);
-                (string val, int version) = (reply.Object.Value, reply.Version);
+            Queue<string> server_pos = new Queue<string>();
+            server_pos.Enqueue(server_id);
 
-                if (val == "N/A" && server_id != "-1")
+            foreach (string s_id in partitionList[part_id])
+                //if (s_id.notindead)
+                server_pos.Enqueue(s_id);
+
+            while (reply == null && server_pos.Count() != 0)
+            {
+                if (client == null || !partitionList[part_id].Contains(client_id))
                 {
-                    ConnectToServer(server_id);
+                    string next_serv = server_pos.Dequeue();
+                    if (next_serv == "-1")
+                        continue;
+
+                    ConnectToServer(next_serv);
+                }
+
+                try
+                {
+                    Console.WriteLine($"Trying to read from {client_id}...");
                     reply = client.ReadServer(request);
-                    (val, version) = (reply.Object.Value, reply.Version);
                 }
-                int local_v; string value;
-
-                lock (this)
+                catch (Exception)
                 {
-                    local_v = data.ContainsKey(part_id) ? data[part_id].vers : -1;
-                    value = local_v < version ? val : data[part_id].val[obj_id];
-
-                    Dictionary<string, string> newPart =
-                        data.ContainsKey(part_id) ? data[part_id].val : new Dictionary<string, string>();
-                    newPart.Add(obj_id, value);
-
-                    if (local_v < version)
-                        data[part_id] = (version, newPart);
+                    Console.WriteLine($"Warning: Server {client_id} might me down.");
+                    client = null;
+                    //if (ServerDown(id))
                 }
+            }
 
-                AddMsgtoGUI($"> Read '{val}' (v{version}).");
-            }
-            catch (Exception)
+            if (reply == null)
             {
-                Console.WriteLine($"Warning: Server {client_id} might me down.");
-                //if (ServerDown(id))
-                //serverClients.Remove(id);
+                Console.WriteLine($"Fatal error: Everybody dead.");
+                return;
             }
+
+            (string read_val, int read_vers) = (reply.Object.Value, reply.Version);
+
+            Console.WriteLine($"Server {client_id} said '{read_val}' (v {read_vers}).");
+            int local_vers; int version; string value;
+
+            lock (this)
+            {
+                local_vers = data.ContainsKey(part_id) ? data[part_id].vers : -1;
+                Console.WriteLine($"Local version is {local_vers}");
+
+                value = local_vers <= read_vers ? read_val : data[part_id].val[obj_id];
+                version = Math.Max(local_vers, read_vers);
+
+                Dictionary<string, string> newPart =
+                    data.ContainsKey(part_id) ? data[part_id].val : new Dictionary<string, string>();
+                newPart[obj_id] = value;
+
+                data[part_id] = (version, newPart);
+            }
+
+            AddMsgtoGUI($"> Read '{value}' (v{version}).");
+            Console.WriteLine($"Value returned is '{value}' (v {version}).");
         }
 
         public void WriteObject(string part_id, string obj_id, string new_value)
         {
-            int new_ver;
+            WriteServerReply reply = null;
             WriteServerRequest request = new WriteServerRequest { PartitionId = part_id, ObjectId = obj_id, NewObject = new Object { Value = new_value } };
-
-            ConnectToServer(partitionMaster[part_id]);
 
             AddMsgtoGUI($"<Write> {part_id} (v{(data.ContainsKey(part_id) ? data[part_id].vers : -1)}) {obj_id} '{new_value}'");
 
-            try
-            {
-                new_ver = client.WriteServer(request).Version;
+            Queue<string> server_pos = new Queue<string>();
+            server_pos.Enqueue(partitionMaster[part_id]);
 
-                lock (this)
+            foreach (string s_id in partitionList[part_id])
+                //if (s_id.notindead)
+                server_pos.Enqueue(s_id);
+
+            string next_serv = "";
+            while (reply == null && server_pos.Count() != 0)
+            {
+                next_serv = server_pos.Dequeue();
+                if (next_serv == "-1")
+                    continue;
+
+                ConnectToServer(next_serv);
+
+                try
                 {
-                    Dictionary<string, string> newPart =
-                        data.ContainsKey(part_id) ? data[part_id].val : new Dictionary<string, string>();
-                    newPart.Add(obj_id, new_value);
-
-                    this.data[part_id] = (new_ver, newPart);
+                    Console.WriteLine($"Trying to write to {next_serv}...");
+                    reply = client.WriteServer(request);
                 }
+                catch (Exception)
+                {
+                    Console.WriteLine($"Warning: Server {next_serv} might me down.");
+                    client = null;
+                    //if (ServerDown(id))
+                }
+            }
 
-                AddMsgtoGUI($"> Written in {partitionMaster[part_id]} (v{new_ver}).");
-            }
-            catch (Exception)
+            if (reply == null)
             {
-                AddMsgtoGUI($"Fail!");
-                Console.WriteLine($"Warning: Server {client_id} might me down.");
-                //if (ServerDown(id))
-                //serverClients.Remove(id);
+                Console.WriteLine($"Fatal error: Everybody dead.");
+                return;
             }
+
+            (string read_master, int read_vers) = (reply.MasterId, reply.Version);
+            Console.WriteLine($"Server {next_serv} said master is {read_master} (v {read_vers}).");
+
+            if (read_master != next_serv)
+            {
+                Console.WriteLine($"Fatal error: Telling lies?");
+                return;
+            }
+
+            lock (this)
+            {
+                partitionMaster[part_id] = read_master;
+
+                Dictionary<string, string> newPart =
+                    data.ContainsKey(part_id) ? data[part_id].val : new Dictionary<string, string>();
+                newPart[obj_id] = new_value;
+
+                data[part_id] = (read_vers, newPart);
+            }
+
+            AddMsgtoGUI($"> Written in {next_serv} (v{read_vers}).");
+            Console.WriteLine($"Value returned is ok from {next_serv} (v {read_vers}).");
         }
 
         public void ListServer(string id)
@@ -259,7 +311,7 @@ namespace GC
 
         public void ConnectToServer(string id)
         {
-            Console.WriteLine("Will switch to server " + id);
+            Console.WriteLine("Will connect to server " + id);
 
             // setup the client side
             if (channel != null)
