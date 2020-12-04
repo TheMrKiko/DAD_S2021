@@ -19,14 +19,14 @@ namespace GS
         public override Task<ReadServerReply> ReadServer(ReadServerRequest request, ServerCallContext context)
         {
             Console.WriteLine();
-            Console.WriteLine($"<Client> Read p_id: {request.PartitionId} obj_id: {request.ObjectId}");
+            Console.WriteLine($"<Client> Read {request.PartitionId} {request.ObjectId}");
             return Task.FromResult(Read(request));
         }
 
         public override Task<WriteServerReply> WriteServer(WriteServerRequest request, ServerCallContext context)
         {
             Console.WriteLine();
-            Console.WriteLine($"<Client> Write p_id: {request.PartitionId} obj_id: {request.ObjectId} obj: {request.NewObject}");
+            Console.WriteLine($"<Client> Write {request.PartitionId} {request.ObjectId} '{request.NewObject.Value}'");
             return Task.FromResult(Write(request));
         }
 

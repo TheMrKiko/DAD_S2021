@@ -192,6 +192,8 @@ namespace GC
             Queue<string> server_pos = new Queue<string>();
             server_pos.Enqueue(partitionMaster[part_id]);
 
+            Console.WriteLine($"Master is {partitionMaster[part_id]}, btw.");
+
             foreach (string s_id in partitionList[part_id])
                 server_pos.Enqueue(s_id);
 
@@ -349,6 +351,7 @@ namespace GC
         {
             Console.WriteLine($"> Servers:");
             Console.WriteLine($"> {string.Join(", ", serverList.Keys)}");
+            Console.WriteLine($"> Dead: {string.Join(", ", deadServers)}");
 
             Console.WriteLine($"> Partitions:");
             foreach (string p_id in partitionList.Keys)

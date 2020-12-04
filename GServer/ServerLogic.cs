@@ -74,6 +74,7 @@ namespace GS
 
             if (masterPartId != id)
             {
+                Console.WriteLine($"Wait, what? I'm not the master!");
                 SHelperService.SHelperServiceClient partMaster = ConnectToServer(masterPartId);
                 try
                 {
@@ -83,6 +84,7 @@ namespace GS
                         ServerId = masterPartId
                     });
 
+                    Console.WriteLine($"Just a client bug...");
                     return (masterPartId, -1);
                 }
                 catch (Exception)
